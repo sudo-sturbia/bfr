@@ -2,7 +2,7 @@ name: Test Suite
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, dev ]
   pull_request:
     branches: [ master ]
 
@@ -40,3 +40,19 @@ jobs:
     - name: Test internal/datastore
       run: go test -v -bench=. .
       working-directory: internal/datastore
+
+    - name: Build internal/books
+      run: go build -v .
+      working-directory: internal/books
+
+    - name: Test internal/books
+      run: go test -v -bench=. .
+      working-directory: internal/books
+
+    - name: Build internal/server
+      run: go build -v .
+      working-directory: internal/server
+
+    - name: Test internal/server
+      run: go test -v -bench=. .
+      working-directory: internal/server
