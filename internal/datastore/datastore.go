@@ -4,6 +4,11 @@ package datastore
 
 // Config holds datastore's configuration options.
 type Config struct {
-	Driver string // Database's driver.
-	Path   string // Datastore to use.
+	Driver string // DBMS's driver.
+
+	Dir       string // Directory containing the datastore.
+	Datastore string // Datastore's name.
+	BookTable string // Table containing books.
+
+	logTo string // Name of the file to write logs to.
 }

@@ -1,6 +1,4 @@
-// Package config provides easy access to configuration options needed
-// to run a server, and holds defaults.
-package config
+package main
 
 import (
 	"fmt"
@@ -24,8 +22,10 @@ func New() *Config {
 		},
 
 		Datastore: &datastore.Config{
-			Driver: "sqlite3",
-			Path:   fmt.Sprintf("%s/.config/bfr/bfr.db", os.Getenv("HOME")),
+			Driver:    "sqlite3",
+			Dir:       fmt.Sprintf("%s/.config/bfr/", os.Getenv("HOME")),
+			Datastore: "bfr.db",
+			BookTable: "books",
 		},
 	}
 }
