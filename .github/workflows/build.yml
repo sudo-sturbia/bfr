@@ -32,3 +32,11 @@ jobs:
 
     - name: Build main
       run: go build -v .
+
+    - name: Build internal/datastore
+      run: go build -v .
+      working-directory: internal/datastore
+
+    - name: Test internal/datastore
+      run: go test -v -bench=. .
+      working-directory: internal/datastore
