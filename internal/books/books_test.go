@@ -1,0 +1,633 @@
+package books
+
+import (
+	"testing"
+)
+
+// Test query generation based on SearchBy.
+func TestQuery(t *testing.T) {
+	searchIn := &SearchIn{
+		Datastore: nil,
+		BookTable: "books",
+	}
+
+	searchQueries := map[*SearchBy]string{
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where title like ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           []string{"a", "b", "c"},
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where (authors like ? or authors like ? or authors like ?);",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      []string{"a", "b", "c"},
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where (languageCode like ? or languageCode like ? or languageCode like ?);",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "123456789",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where isbn = ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "123456789abc",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where isbn13 = ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        3,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where averageRating <= ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where averageRating > ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         100,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where pages <= ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        50,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where pages > ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  100,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where ratingsCount <= ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: 50,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where ratingsCount > ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  100,
+			ReviewsCountFloor: -1,
+		}: "select * from books where reviewsCount <= ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: 50,
+		}: "select * from books where reviewsCount > ?;",
+
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           nil,
+			LanguageCode:      []string{"a", "b"},
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where title like ? and (languageCode like ? or languageCode like ?);",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "0123456789abc",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        150,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  200,
+			ReviewsCountFloor: -1,
+		}: "select * from books where isbn13 = ? and pages > ? and reviewsCount <= ?;",
+
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "0123456789",
+			ISBN13:            "",
+			RatingCeil:        4.8,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  500,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books where title like ? and isbn = ? and averageRating <= ? and ratingsCount <= ?;",
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: "select * from books;",
+
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           []string{"a", "b", "c"},
+			LanguageCode:      []string{"a", "b"},
+			ISBN:              "0123456789",
+			ISBN13:            "0123456789abc",
+			RatingCeil:        4.5,
+			RatingFloor:       2,
+			PagesCeil:         200,
+			PagesFloor:        20,
+			RatingsCountCeil:  1000,
+			RatingsCountFloor: 500,
+			ReviewsCountCeil:  1000,
+			ReviewsCountFloor: 500,
+		}: "select * from books where title like ? and (authors like ? or authors like ? or authors like ?) and (languageCode like ? or languageCode like ?) and " +
+			"isbn = ? and isbn13 = ? and " +
+			"averageRating <= ? and averageRating > ? and " +
+			"pages <= ? and pages > ? and " +
+			"ratingsCount <= ? and ratingsCount > ? and " +
+			"reviewsCount <= ? and reviewsCount > ?;",
+	}
+
+	for s, sq := range searchQueries {
+		if q, _ := query(searchIn, s); q != sq {
+			t.Errorf("Expected \"%s\", Found \"%s\".", sq, q)
+		}
+	}
+}
+
+// Test parameters of queries generated based on SearchBy.
+func TestQueryParameters(t *testing.T) {
+	searchIn := &SearchIn{
+		Datastore: nil,
+		BookTable: "books",
+	}
+
+	searchQueries := map[*SearchBy][]interface{}{
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"aaa"},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           []string{"a", "b", "c"},
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"a", "b", "c"},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      []string{"a", "b", "c"},
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"a", "b", "c"},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "123456789",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"123456789"},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "123456789abc",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"123456789abc"},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        3,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{float32(3)},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{float32(1)},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         100,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{100},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        50,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{50},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  100,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{100},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: 50,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{50},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  100,
+			ReviewsCountFloor: -1,
+		}: []interface{}{100},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: 50,
+		}: []interface{}{50},
+
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           nil,
+			LanguageCode:      []string{"a", "b"},
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"aaa", "a", "b"},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "0123456789abc",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        150,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  200,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"0123456789abc", 150, 200},
+
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "0123456789",
+			ISBN13:            "",
+			RatingCeil:        4.8,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  500,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{"aaa", "0123456789", float32(4.8), 500},
+
+		&SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		}: []interface{}{},
+
+		&SearchBy{
+			TitleHas:          "aaa",
+			Authors:           []string{"a", "b", "c"},
+			LanguageCode:      []string{"a", "b"},
+			ISBN:              "0123456789",
+			ISBN13:            "0123456789abc",
+			RatingCeil:        4.5,
+			RatingFloor:       2,
+			PagesCeil:         200,
+			PagesFloor:        20,
+			RatingsCountCeil:  1000,
+			RatingsCountFloor: 500,
+			ReviewsCountCeil:  1000,
+			ReviewsCountFloor: 500,
+		}: []interface{}{"aaa", "a", "b", "c", "a", "b", "0123456789", "0123456789abc", float32(4.5), float32(2), 200, 20, 1000, 500, 1000, 500},
+	}
+
+	for s, sp := range searchQueries {
+		if _, p := query(searchIn, s); !compareSlices(p, sp) {
+			t.Errorf("Expected \"%s\", Found \"%s\".", sp, p)
+		}
+	}
+}
+
+// compareSlices returns true if a and b are equal, false otherwise.
+func compareSlices(a, b []interface{}) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
