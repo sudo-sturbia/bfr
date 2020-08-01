@@ -60,14 +60,13 @@ type SearchBy struct {
 // SearchByTitle searchs for books with a specific given title in the
 // given datastore and table. Returns an empty list if non is found.
 func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
-	books := make([]*Book, 0)
-
 	search := fmt.Sprintf("select * from %s where title = ?;", searchIn.BookTable)
 	rows, err := searchIn.Datastore.Query(search, title)
 	if err != nil {
 		return nil, err
 	}
 
+	books := make([]*Book, 0)
 	for rows.Next() {
 		book := new(Book)
 		rows.Scan(
@@ -92,7 +91,30 @@ func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
 // Search searchs the specified table in the given database using SearchBy's
 // fields, and returns a list of books that match the given parameters.
 func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
+	query, parameters := query(searchIn, searchBy)
+	rows, err := searchIn.Datastore.Query(query, parameters...)
+	if err != nil {
+		return nil, err
+	}
+
 	books := make([]*Book, 0)
+	for rows.Next() {
+		book := new(Book)
+		rows.Scan(
+			&book.Id,
+			&book.Title,
+			&book.Authors,
+			&book.AverageRating,
+			&book.ISBN,
+			&book.ISBN13,
+			&book.LanguageCode,
+			&book.Pages,
+			&book.RatingsCount,
+			&book.ReviewsCount,
+		)
+
+		books = append(books, book)
+	}
 
 	return books, nil
 }
@@ -184,7 +206,7 @@ func buildQuery(queryFields []string, searchIn *SearchIn) string {
 // and a parameter needed for the prepared statement to execute.
 func titleHas(titleHas string) (bool, string, string) {
 	if titleHas != "" {
-		return true, "title like ?", titleHas
+		return true, "title like ?", fmt.Sprintf("%%%s%%", titleHas)
 	}
 
 	return false, "", ""
@@ -200,7 +222,7 @@ func authors(authors []string) (bool, string, []interface{}) {
 		builder.WriteByte('(')
 
 		for i, author := range authors {
-			parameters[i] = author
+			parameters[i] = fmt.Sprintf("%%%s%%", author)
 			if i != 0 {
 				builder.WriteString(" or ")
 			}
@@ -224,7 +246,7 @@ func languageCode(codes []string) (bool, string, []interface{}) {
 		builder.WriteByte('(')
 
 		for i, code := range codes {
-			parameters[i] = code
+			parameters[i] = fmt.Sprintf("%%%s%%", code)
 
 			if i != 0 {
 				builder.WriteString(" or ")
