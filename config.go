@@ -18,6 +18,7 @@ type Config struct {
 func New() *Config {
 	return &Config{
 		Server: &server.Config{
+			Host: "",
 			Port: "6060",
 		},
 
