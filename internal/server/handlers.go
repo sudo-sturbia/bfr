@@ -43,7 +43,11 @@ func errorResponse(message string, w io.Writer, r *http.Request) {
 func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	books, err := books.SearchByTitle(s.searchIn, vars["title"])
+	books, err := books.SearchByTitle(&books.SearchIn{
+		Datastore: s.searchIn.Datastore,
+		BookTable: s.searchIn.BookTable,
+	}, vars["title"])
+
 	if err != nil {
 		errorResponse("Search failed.", w, r)
 	} else {
@@ -78,7 +82,11 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		errorResponse("Invalid request url.", w, r)
 	} else {
-		books, err := books.Search(s.searchIn, searchBy)
+		books, err := books.Search(&books.SearchIn{
+			Datastore: s.searchIn.Datastore,
+			BookTable: s.searchIn.BookTable,
+		}, searchBy)
+
 		if err != nil {
 			errorResponse("Search failed.", w, r)
 		} else {

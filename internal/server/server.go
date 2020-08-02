@@ -3,11 +3,11 @@
 package server
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/sudo-sturbia/bfr/internal/books"
 )
 
 // Server represents bfr's http server, and holds all dependencies needed
@@ -16,7 +16,15 @@ type Server struct {
 	config *Config     // Server's configuration options.
 	router *mux.Router // Server's router.
 
-	searchIn *books.SearchIn // Datastore to search in.
+	searchIn *SearchIn // Datastore to search in.
+}
+
+// SearchIn Contains the database and table's name to search in. It is a
+// copy of package books's SearchIn struct. It is created to importing
+// books package into main.
+type SearchIn struct {
+	Datastore *sql.DB // Datastore to search in.
+	BookTable string  // Table to search in.
 }
 
 // Config holds server's configuration options.
@@ -27,7 +35,7 @@ type Config struct {
 
 // New creates and returns a new, initialized instance of bfr's server
 // to run.
-func New(config *Config, searchIn *books.SearchIn) *Server {
+func New(config *Config, searchIn *SearchIn) *Server {
 	s := &Server{
 		config:   config,
 		searchIn: searchIn,
