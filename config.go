@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/sudo-sturbia/bfr/internal/datastore"
 	"github.com/sudo-sturbia/bfr/internal/server"
 )
@@ -14,8 +15,10 @@ type Config struct {
 	Datastore *datastore.Config // Datastore's configuration options.
 }
 
-// New returns a new configuration object with initialized fields.
-func New() *Config {
+// newConfig returns a new configuration object with initialized fields,
+// and sets global logger's configuration options.
+func newConfig() *Config {
+	configLogger()
 	return &Config{
 		Server: &server.Config{
 			Host: "",
@@ -29,4 +32,10 @@ func New() *Config {
 			BookTable: "books",
 		},
 	}
+}
+
+// configLogger sets global logger's configuration options.
+func configLogger() {
+	log.SetFormatter(new(log.JSONFormatter))
+	log.SetOutput(os.Stderr)
 }
