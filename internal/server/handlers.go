@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
+	log "github.com/sirupsen/logrus"
 	"github.com/sudo-sturbia/bfr/internal/books"
 )
 
@@ -24,10 +25,17 @@ type messageResponse struct {
 }
 
 // errorResponse responds to a request with an error message using
-// the given writer.
-func errorResponse(message string, w io.Writer) {
-	response, _ := json.MarshalIndent(&messageResponse{message}, "", "\t")
+// the given writer, and logs the error.
+func errorResponse(message string, w io.Writer, r *http.Request) {
+	log.WithFields(
+		log.Fields{
+			"IP":     r.RemoteAddr,
+			"Method": r.Method,
+			"URL":    r.URL.String(),
+		},
+	).Info(message)
 
+	response, _ := json.MarshalIndent(&messageResponse{message}, "", "\t")
 	fmt.Fprint(w, response)
 }
 
@@ -37,11 +45,11 @@ func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
 
 	books, err := books.SearchByTitle(s.searchIn, vars["title"])
 	if err != nil {
-		errorResponse("Search failed.", w)
+		errorResponse("Search failed.", w, r)
 	} else {
 		response, err := json.MarshalIndent(books, "", "\t")
 		if err != nil {
-			errorResponse("Search failed.", w)
+			errorResponse("Search failed.", w, r)
 		} else {
 			fmt.Fprint(w, response)
 		}
@@ -68,15 +76,15 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 
 	err := decoder.Decode(searchBy, r.URL.Query())
 	if err != nil {
-		errorResponse("Invalid request url.", w)
+		errorResponse("Invalid request url.", w, r)
 	} else {
 		books, err := books.Search(s.searchIn, searchBy)
 		if err != nil {
-			errorResponse("Search failed.", w)
+			errorResponse("Search failed.", w, r)
 		} else {
 			response, err := json.MarshalIndent(books, "", "\t")
 			if err != nil {
-				errorResponse("Search failed.", w)
+				errorResponse("Search failed.", w, r)
 			} else {
 				fmt.Fprint(w, response)
 			}
