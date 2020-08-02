@@ -13,9 +13,10 @@ import (
 // Server represents bfr's http server, and holds all dependencies needed
 // for a server to run.
 type Server struct {
-	config   *Config         // Server's configuration options.
+	config *Config     // Server's configuration options.
+	router *mux.Router // Server's router.
+
 	searchIn *books.SearchIn // Datastore to search in.
-	router   *mux.Router     // Server's router.
 }
 
 // Config holds server's configuration options.

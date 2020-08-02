@@ -24,7 +24,12 @@ type Config struct {
 	Datastore string // Datastore's name.
 	BookTable string // Table containing books.
 
-	logTo string // Name of the file to write logs to.
+	LogTo string // Name of the file to write logs to.
+}
+
+// Open opens a connection to a database specified by given configuration.
+func Open(config *Config) (*sql.DB, error) {
+	return sql.Open(config.Driver, fmt.Sprintf("file:%s%s", config.Dir, config.Datastore))
 }
 
 // New creates a new datastore to be used by the server. The datastore is created
@@ -93,8 +98,8 @@ func insertBooks(dataset *os.File, tx *sql.Tx, config *Config) error {
 	}
 
 	// Set logger's output.
-	if config.logTo != "" {
-		logTo, err := os.Create(config.logTo)
+	if config.LogTo != "" {
+		logTo, err := os.Create(config.LogTo)
 		if err == nil {
 			log.SetOutput(bufio.NewWriter(logTo))
 			defer logTo.Close()
