@@ -48,7 +48,7 @@ func New(datasetPath string, config *Config, overwriteIfExists bool) error {
 		return err
 	}
 
-	os.MkdirAll(config.Dir, os.ModeDir)
+	os.MkdirAll(config.Dir, 0777)
 	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s%s", config.Dir, config.Datastore))
 	if err != nil {
 		return err
