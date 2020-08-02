@@ -36,7 +36,7 @@ func errorResponse(message string, w io.Writer, r *http.Request) {
 	).Info(message)
 
 	response, _ := json.MarshalIndent(&messageResponse{message}, "", "\t")
-	fmt.Fprint(w, response)
+	fmt.Fprint(w, string(response))
 }
 
 // searchByTitle is a handler for /books/:title endpoint.
@@ -55,7 +55,7 @@ func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			errorResponse("Search failed.", w, r)
 		} else {
-			fmt.Fprint(w, response)
+			fmt.Fprint(w, string(response))
 		}
 	}
 }
@@ -94,7 +94,7 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				errorResponse("Search failed.", w, r)
 			} else {
-				fmt.Fprint(w, response)
+				fmt.Fprint(w, string(response))
 			}
 		}
 	}
