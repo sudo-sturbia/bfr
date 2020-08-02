@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // Number of dataset's columns.
@@ -23,8 +23,6 @@ type Config struct {
 	Dir       string // Directory containing the datastore.
 	Datastore string // Datastore's name.
 	BookTable string // Table containing books.
-
-	LogTo string // Name of the file to write logs to.
 }
 
 // Open opens a connection to a database specified by given configuration.
@@ -92,20 +90,6 @@ func New(datasetPath string, config *Config, overwriteIfExists bool) error {
 // insertBooks inserts books from a dataset (csv file) into a table using
 // given transaction. Corrupt lines are logged and skipped.
 func insertBooks(dataset *os.File, tx *sql.Tx, config *Config) error {
-	log := &logrus.Logger{
-		Formatter: new(logrus.JSONFormatter),
-		Out:       os.Stderr,
-	}
-
-	// Set logger's output.
-	if config.LogTo != "" {
-		logTo, err := os.Create(config.LogTo)
-		if err == nil {
-			log.SetOutput(bufio.NewWriter(logTo))
-			defer logTo.Close()
-		}
-	}
-
 	// Use prepared statements to populate books' table in bfr's database.
 	insert := fmt.Sprintf("insert into %s values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", config.BookTable)
 	stmt, err := tx.Prepare(insert)
@@ -122,7 +106,7 @@ func insertBooks(dataset *os.File, tx *sql.Tx, config *Config) error {
 
 		if len(fields) != Columns {
 			log.WithFields(
-				logrus.Fields{
+				log.Fields{
 					"line":   line,
 					"fields": len(fields),
 				},
@@ -144,7 +128,7 @@ func insertBooks(dataset *os.File, tx *sql.Tx, config *Config) error {
 		)
 		if err != nil {
 			log.WithFields(
-				logrus.Fields{
+				log.Fields{
 					"line":   line,
 					"fields": len(fields),
 				},
