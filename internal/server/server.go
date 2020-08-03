@@ -42,7 +42,7 @@ func New(config *Config, searchIn *SearchIn) *Server {
 		router:   mux.NewRouter(),
 	}
 
-	s.router.HandleFunc("/books/{name}", s.searchByTitle).Methods("GET")
+	s.router.HandleFunc("/books/{title}", s.searchByTitle).Methods("GET")
 	s.router.HandleFunc("/books", s.search).Methods("GET")
 
 	return s
