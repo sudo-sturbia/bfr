@@ -1,6 +1,5 @@
 // Package books contains book-related logic, and provides functions to search
 // for books in a datastore.
-//
 // books also serves to expose an API to be used by servers.
 package books
 
@@ -9,12 +8,12 @@ import (
 	"fmt"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Used with sql package.
 )
 
 // Book represents a searchable book object.
 type Book struct {
-	Id            int     // A different number for each book.
+	ID            int     // A different number for each book.
 	Title         string  // Book's title.
 	Authors       string  // Book's authors.
 	AverageRating float32 // Average rating (out of 5.)
@@ -32,8 +31,8 @@ type SearchIn struct {
 	BookTable string  // Table to search in.
 }
 
-// SearchBy is a set of parameters to use when searching the datastore
-// for books.
+// SearchBy is a set of parameters to use when searching for books in
+// a datastore.
 // Not all fields have to be specifed, a search can be performed using
 // only a sub-set of the fields. To ignore a string field when searching,
 // leave it empty, to ignore a number set it to < 0.
@@ -70,7 +69,7 @@ func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
 	for rows.Next() {
 		book := new(Book)
 		rows.Scan(
-			&book.Id,
+			&book.ID,
 			&book.Title,
 			&book.Authors,
 			&book.AverageRating,
@@ -101,7 +100,7 @@ func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
 	for rows.Next() {
 		book := new(Book)
 		rows.Scan(
-			&book.Id,
+			&book.ID,
 			&book.Title,
 			&book.Authors,
 			&book.AverageRating,

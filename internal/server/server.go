@@ -1,5 +1,5 @@
-// Package server is used to create a new, initialized instance of
-// a bfr server ready to run.
+// Package server is used to create, and run a new, initialized
+// server instance.
 package server
 
 import (
@@ -19,9 +19,9 @@ type Server struct {
 	searchIn *SearchIn // Datastore to search in.
 }
 
-// SearchIn Contains the database and table's name to search in. It is a
-// copy of package books's SearchIn struct. It is created to importing
-// books package into main.
+// SearchIn Contains a database and name of the table to search in. It is a
+// copy of package books's SearchIn struct created to prevent importing of
+// books package into main to limit dependency.
 type SearchIn struct {
 	Datastore *sql.DB // Datastore to search in.
 	BookTable string  // Table to search in.
@@ -33,8 +33,8 @@ type Config struct {
 	Port string // Port to run the server on.
 }
 
-// New creates and returns a new, initialized instance of bfr's server
-// to run.
+// New creates and returns a new, initialized server instance with handlers
+// pointing to correct routes.
 func New(config *Config, searchIn *SearchIn) *Server {
 	s := &Server{
 		config:   config,
@@ -48,8 +48,7 @@ func New(config *Config, searchIn *SearchIn) *Server {
 	return s
 }
 
-// Run runs a server instance. s listens on the port specified by
-// s.Config.Port.
+// Run runs a server instance on the host and port specified in its config.
 func (s *Server) Run() {
 	http.ListenAndServe(fmt.Sprintf("%s:%s", s.config.Host, s.config.Port), s.router)
 }

@@ -39,7 +39,7 @@ func TestSearchByTitle(t *testing.T) {
 
 	books := map[string]*Book{
 		"Harry Potter and the Chamber of Secrets (Harry Potter  #2)": &Book{
-			Id:            4,
+			ID:            4,
 			Title:         "Harry Potter and the Chamber of Secrets (Harry Potter  #2)",
 			Authors:       "J.K. Rowling",
 			AverageRating: 4.41,
@@ -52,7 +52,7 @@ func TestSearchByTitle(t *testing.T) {
 		},
 
 		"A Short History of Nearly Everything": &Book{
-			Id:            21,
+			ID:            21,
 			Title:         "A Short History of Nearly Everything",
 			Authors:       "Bill Bryson-William Roberts",
 			AverageRating: 4.2,
@@ -127,7 +127,7 @@ func TestSearch(t *testing.T) {
 			ReviewsCountFloor: -1,
 		}: []*Book{
 			&Book{
-				Id:            4,
+				ID:            4,
 				Title:         "Harry Potter and the Chamber of Secrets (Harry Potter  #2)",
 				Authors:       "J.K. Rowling",
 				AverageRating: 4.41,
@@ -156,7 +156,7 @@ func TestSearch(t *testing.T) {
 			ReviewsCountFloor: -1,
 		}: []*Book{
 			&Book{
-				Id:            8,
+				ID:            8,
 				Title:         "Harry Potter Boxed Set  Books 1-5 (Harry Potter  #1-5)",
 				Authors:       "J.K. Rowling-Mary GrandPré",
 				AverageRating: 4.78,
@@ -169,7 +169,7 @@ func TestSearch(t *testing.T) {
 			},
 
 			&Book{
-				Id:            10,
+				ID:            10,
 				Title:         "Harry Potter Collection (Harry Potter  #1-6)",
 				Authors:       "J.K. Rowling",
 				AverageRating: 4.73,
@@ -198,7 +198,7 @@ func TestSearch(t *testing.T) {
 			ReviewsCountFloor: 2000,
 		}: []*Book{
 			&Book{
-				Id:            24,
+				ID:            24,
 				Title:         "In a Sunburned Country",
 				Authors:       "Bill Bryson",
 				AverageRating: 4.07,
@@ -211,7 +211,7 @@ func TestSearch(t *testing.T) {
 			},
 
 			&Book{
-				Id:            25,
+				ID:            25,
 				Title:         "I'm a Stranger Here Myself: Notes on Returning to America After Twenty Years Away",
 				Authors:       "Bill Bryson",
 				AverageRating: 3.9,

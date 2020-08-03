@@ -9,11 +9,11 @@ import (
 	"os"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Used with sql package.
 	log "github.com/sirupsen/logrus"
 )
 
-// Number of dataset's columns.
+// Columns is number of dataset's columns.
 const Columns = 10
 
 // Config holds datastore's configuration options.
@@ -33,9 +33,12 @@ func Open(config *Config) (*sql.DB, error) {
 // New creates a new datastore to be used by the server. The datastore is created
 // at the path specified by config (Dir + Name). overwriteIfExists specifies what
 // to do if a datastore with the same path exists. The datastore is created using
-// dataset at the specified path. Dataset should be a csv file with the following
-// columns (id, title, authors, averageRating, isbn, isbn13, languageCode, pages,
-// ratingsCount, textReviewsCount).
+// dataset at the specified path.
+// Dataset should be a csv file with the following columns (id, title, authors,
+// averageRating, isbn, isbn13, languageCode, pages, ratingsCount, textReviewsCount)
+// in this order. The dataset is processed line by line and corrupt lines (wrong
+// data types, incorrect number of columns, extra commas, etc..) are skipped (and
+// logged).
 // See https://www.kaggle.com/jealousleopard/goodreadsbooks
 func New(datasetPath string, config *Config, overwriteIfExists bool) error {
 	dataset, err := os.Open(datasetPath)

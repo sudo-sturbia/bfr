@@ -23,25 +23,6 @@ type messageResponse struct {
 	Message string
 }
 
-// errorResponse responds to a request with an error message using
-// the given writer, and logs the error.
-func errorResponse(message string, w http.ResponseWriter, r *http.Request) {
-	log.WithFields(
-		log.Fields{
-			"IP":     r.RemoteAddr,
-			"Method": r.Method,
-			"URL":    r.URL.String(),
-		},
-	).Info(message)
-
-	response, _ := json.MarshalIndent(&messageResponse{message}, "", "\t")
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
-
-	fmt.Fprint(w, string(response))
-}
-
 // searchByTitle is a handler for /books/:title endpoint.
 func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -107,4 +88,23 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+// errorResponse responds to a request with an error message using
+// the given writer, and logs the error.
+func errorResponse(message string, w http.ResponseWriter, r *http.Request) {
+	log.WithFields(
+		log.Fields{
+			"IP":     r.RemoteAddr,
+			"Method": r.Method,
+			"URL":    r.URL.String(),
+		},
+	).Info(message)
+
+	response, _ := json.MarshalIndent(&messageResponse{message}, "", "\t")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+
+	fmt.Fprint(w, string(response))
 }
