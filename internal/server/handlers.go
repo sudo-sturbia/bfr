@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -26,7 +25,7 @@ type messageResponse struct {
 
 // errorResponse responds to a request with an error message using
 // the given writer, and logs the error.
-func errorResponse(message string, w io.Writer, r *http.Request) {
+func errorResponse(message string, w http.ResponseWriter, r *http.Request) {
 	log.WithFields(
 		log.Fields{
 			"IP":     r.RemoteAddr,
@@ -36,6 +35,10 @@ func errorResponse(message string, w io.Writer, r *http.Request) {
 	).Info(message)
 
 	response, _ := json.MarshalIndent(&messageResponse{message}, "", "\t")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+
 	fmt.Fprint(w, string(response))
 }
 
@@ -55,12 +58,15 @@ func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			errorResponse("Search failed.", w, r)
 		} else {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+
 			fmt.Fprint(w, string(response))
 		}
 	}
 }
 
-// search is a handler for /books/ endpoint.
+// search is a handler for /books endpoint.
 func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 	searchBy := &books.SearchBy{
 		TitleHas:          "",
@@ -94,6 +100,9 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				errorResponse("Search failed.", w, r)
 			} else {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+
 				fmt.Fprint(w, string(response))
 			}
 		}
