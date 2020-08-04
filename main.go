@@ -34,11 +34,15 @@ func main() {
 // parseFlags parses, and handles command line flags.
 func parseFlags() {
 	help := flag.Bool("h", false, "Print a help message.")
+	port := flag.String("port", "", "Specify a port to run the server on.")
 	dataset := flag.String("dataset", "", "Load a new csv dataset from specified path.")
 	flag.Parse()
 
 	if *help {
 		description()
+	}
+	if *port != "" {
+		specifyPort(*port)
 	}
 	if *dataset != "" {
 		createDatastore(*dataset)
@@ -49,14 +53,20 @@ func parseFlags() {
 func description() {
 	defer os.Exit(0)
 	fmt.Printf(
-		"%s\n%s\n%s\n%s\n%s\n\n%s\n",
+		"%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n",
 		"bfr is a REST API to search for books using a set of parameters.",
 		"Usage:",
-		"    bfr                Runs as a web server at localhost:6060.",
-		"    bfr -dataset path  Loads a new csv dataset to use as a datastore, then runs the server.",
-		"    bfr -h             Prints a help message.",
+		"    bfr                 Runs as a web server at :6060.",
+		"    bfr -dataset path   Loads a new csv dataset to use as a datastore, then runs the server.",
+		"    bfr -port <number>  Specifies a different port to run the server on.",
+		"    bfr -h              Prints a help message.",
 		"See github.com/sudo-sturbia/bfr.",
 	)
+}
+
+// specifyPort updates the port that the server runs on.
+func specifyPort(port string) {
+	config.Server.Port = port
 }
 
 // createDatastore creates a new datastore using dataset at specified
