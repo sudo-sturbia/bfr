@@ -11,6 +11,8 @@ import (
 	_ "github.com/mattn/go-sqlite3" // Used with sql package.
 )
 
+const titleSearch = true // Used as a parameter when func query is called.
+
 // Book represents a searchable book object.
 type Book struct {
 	ID            int     // A different number for each book.
@@ -91,7 +93,7 @@ func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
 // Search searchs in table and database specified in given SearchIn, and returns
 // a list of books that match the parameters given in SearchBy.
 func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
-	query, parameters := query(searchIn, searchBy, false)
+	query, parameters := query(searchIn, searchBy, !titleSearch)
 	rows, err := searchIn.Datastore.Query(query, parameters...)
 	if err != nil {
 		return nil, err
@@ -122,7 +124,7 @@ func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
 // SearchForTitles works similar to Search but returns a list of titles (strings)
 // instead of books. Titles can be then used to search for a specific book.
 func SearchForTitles(searchIn *SearchIn, searchBy *SearchBy) ([]string, error) {
-	query, parameters := query(searchIn, searchBy, true)
+	query, parameters := query(searchIn, searchBy, titleSearch)
 	rows, err := searchIn.Datastore.Query(query, parameters...)
 	if err != nil {
 		return nil, err
