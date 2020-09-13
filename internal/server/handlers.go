@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	log "github.com/sirupsen/logrus"
-	"github.com/sudo-sturbia/bfr/internal/books"
+	"github.com/sudo-sturbia/bfr/pkg/books"
 )
 
 // A decoder to use for query parameters.
