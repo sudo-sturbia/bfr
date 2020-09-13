@@ -25,7 +25,8 @@ type Book struct {
 	ReviewsCount  int     // Number of text reviews.
 }
 
-// SearchIn contains the database and table's name to search in.
+// SearchIn contains the database and table's name to search in. Table's
+// layout is specified in github.com/sudo-sturbia/bfr/internal/datastore.
 type SearchIn struct {
 	Datastore *sql.DB // Datastore to search in.
 	BookTable string  // Table to search in.
@@ -40,8 +41,8 @@ type SearchIn struct {
 type SearchBy struct {
 	TitleHas string // A sub-string that must exist in the title.
 
-	Authors      []string // Book's authors. Ignored if nil or empty.
-	LanguageCode []string // Must be one of these languages. Ignored if nil or empty.
+	Authors      []string // Must have at least one of these authors. Ignored if nil or empty.
+	LanguageCode []string // Must be in at least one of these languages. Ignored if nil or empty.
 
 	ISBN   string // 10 digit ISBN.
 	ISBN13 string // 13 digit ISBN.
@@ -56,8 +57,8 @@ type SearchBy struct {
 	ReviewsCountFloor int     // Number of reviews must be higher than.
 }
 
-// SearchByTitle searchs for books with a specific given title in the
-// given datastore and table. Returns an empty list if non is found.
+// SearchByTitle searchs in table and database specified in given SearchIn, and returns
+// a list of books that match the given title.
 func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
 	search := fmt.Sprintf("select * from %s where title = ?;", searchIn.BookTable)
 	rows, err := searchIn.Datastore.Query(search, title)
@@ -87,8 +88,8 @@ func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
 	return books, nil
 }
 
-// Search searchs the specified table in the given database using SearchBy's
-// fields, and returns a list of books that match the given parameters.
+// Search searchs in table and database specified in given SearchIn, and returns
+// a list of books that match the parameters given in SearchBy.
 func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
 	query, parameters := query(searchIn, searchBy)
 	rows, err := searchIn.Datastore.Query(query, parameters...)
@@ -118,76 +119,76 @@ func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
 	return books, nil
 }
 
-// query generates a SQL search query based on fields specified in SearchBy.
-// Returns a sql query, and a list of parameters to use with the prepared
+// query generates a SQL select query based on fields specified in SearchBy.
+// Returns a prepared statement, and a list of parameters to use with the prepared
 // statement when executing.
 func query(searchIn *SearchIn, searchBy *SearchBy) (string, []interface{}) {
-	queryFields := make([]string, 0)
+	queryParts := make([]string, 0)
 	fields := make([]interface{}, 0)
 
 	if ok, q, f := titleHas(searchBy.TitleHas); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := authors(searchBy.Authors); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f...)
+		queryParts, fields = append(queryParts, q), append(fields, f...)
 	}
 
 	if ok, q, f := languageCode(searchBy.LanguageCode); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f...)
+		queryParts, fields = append(queryParts, q), append(fields, f...)
 	}
 
 	if ok, q, f := isbn(searchBy.ISBN); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := isbn13(searchBy.ISBN13); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := ratingCeil(searchBy.RatingCeil); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := ratingFloor(searchBy.RatingFloor); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := pagesCeil(searchBy.PagesCeil); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := pagesFloor(searchBy.PagesFloor); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := ratingsCountCeil(searchBy.RatingsCountCeil); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := ratingsCountFloor(searchBy.RatingsCountFloor); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := reviewsCountCeil(searchBy.ReviewsCountCeil); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
 	if ok, q, f := reviewsCountFloor(searchBy.ReviewsCountFloor); ok {
-		queryFields, fields = append(queryFields, q), append(fields, f)
+		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
-	return buildQuery(queryFields, searchIn), fields
+	return buildQuery(queryParts, searchIn), fields
 }
 
 // buildQuery builds a sql select query using given a list of search string.
-func buildQuery(queryFields []string, searchIn *SearchIn) string {
+func buildQuery(queryParts []string, searchIn *SearchIn) string {
 	builder := new(strings.Builder)
 	builder.WriteString(fmt.Sprintf("select * from %s", searchIn.BookTable))
 
-	if len(queryFields) != 0 {
+	if len(queryParts) != 0 {
 		builder.WriteString(" where ")
-		for i, field := range queryFields {
+		for i, field := range queryParts {
 			if i != 0 {
 				builder.WriteString(" and ")
 			}
