@@ -91,7 +91,7 @@ func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
 // Search searchs in table and database specified in given SearchIn, and returns
 // a list of books that match the parameters given in SearchBy.
 func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
-	query, parameters := query(searchIn, searchBy)
+	query, parameters := query(searchIn, searchBy, false)
 	rows, err := searchIn.Datastore.Query(query, parameters...)
 	if err != nil {
 		return nil, err
@@ -119,10 +119,29 @@ func Search(searchIn *SearchIn, searchBy *SearchBy) ([]*Book, error) {
 	return books, nil
 }
 
+// SearchForTitles works similar to Search but returns a list of titles (strings)
+// instead of books. Titles can be then used to search for a specific book.
+func SearchForTitles(searchIn *SearchIn, searchBy *SearchBy) ([]string, error) {
+	query, parameters := query(searchIn, searchBy, true)
+	rows, err := searchIn.Datastore.Query(query, parameters...)
+	if err != nil {
+		return nil, err
+	}
+
+	titles := make([]string, 0)
+	for rows.Next() {
+		titles = append(titles, "")
+		rows.Scan(&titles[len(titles)-1])
+	}
+
+	return titles, nil
+}
+
 // query generates a SQL select query based on fields specified in SearchBy.
 // Returns a prepared statement, and a list of parameters to use with the prepared
-// statement when executing.
-func query(searchIn *SearchIn, searchBy *SearchBy) (string, []interface{}) {
+// statement when executing. If titles is true, then select statement only selects
+// books' titles.
+func query(searchIn *SearchIn, searchBy *SearchBy, titles bool) (string, []interface{}) {
 	queryParts := make([]string, 0)
 	fields := make([]interface{}, 0)
 
@@ -178,13 +197,20 @@ func query(searchIn *SearchIn, searchBy *SearchBy) (string, []interface{}) {
 		queryParts, fields = append(queryParts, q), append(fields, f)
 	}
 
-	return buildQuery(queryParts, searchIn), fields
+	return buildQuery(queryParts, searchIn, titles), fields
 }
 
 // buildQuery builds a sql select query using given a list of search string.
-func buildQuery(queryParts []string, searchIn *SearchIn) string {
+// If titles is true, then buildQuery returns a sql statement that selects
+// titles only, otherwise a statement that selects all columns is returned.
+func buildQuery(queryParts []string, searchIn *SearchIn, titles bool) string {
 	builder := new(strings.Builder)
-	builder.WriteString(fmt.Sprintf("select * from %s", searchIn.BookTable))
+
+	if titles {
+		builder.WriteString(fmt.Sprintf("select title from %s", searchIn.BookTable))
+	} else {
+		builder.WriteString(fmt.Sprintf("select * from %s", searchIn.BookTable))
+	}
 
 	if len(queryParts) != 0 {
 		builder.WriteString(" where ")

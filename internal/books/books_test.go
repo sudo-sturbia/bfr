@@ -564,7 +564,7 @@ func TestQuery(t *testing.T) {
 	}
 
 	for s, sq := range searchQueries {
-		if q, _ := query(searchIn, s); q != sq {
+		if q, _ := query(searchIn, s, false); q != sq {
 			t.Errorf("Expected \"%s\", Found \"%s\".", sq, q)
 		}
 	}
@@ -868,7 +868,7 @@ func TestQueryParameters(t *testing.T) {
 	}
 
 	for s, sp := range searchQueries {
-		if _, p := query(searchIn, s); !compareSlices(p, sp) {
+		if _, p := query(searchIn, s, false); !compareSlices(p, sp) {
 			t.Errorf("Expected \"%s\", Found \"%s\".", sp, p)
 		}
 	}
