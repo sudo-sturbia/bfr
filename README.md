@@ -20,11 +20,11 @@ Usage:
 See github.com/sudo-sturbia/bfr.
 ```
 
-At first run you must create a new datastore using `-dataset` flag, afterwards
-the server can used by simply running `bfr`.
+For the first run you must create a new datastore using `-dataset` flag, afterwards
+the server uses the last created datastore and can run simply using `bfr`.
 
-For the dataset, I use [goodreads-books](https://www.kaggle.com/jealousleopard/goodreadsbooks),
-you can also construct your own dataset as long as it matches [this sample](test-data/booksTest.csv).
+For the dataset checkout [goodreads-books](https://www.kaggle.com/jealousleopard/goodreadsbooks),
+you can also construct your own dataset as long as its columns match [this sample](test-data/booksTest.csv).
 
 ### API
 #### Endpoints
@@ -39,12 +39,13 @@ Searchs for, and lists all books with this specific title.
 GET /books
 ```
 
-Searchs for, and lists books based on a set of search parameters. A search
+Searchs for, and lists books (or their titles) based on a set of search parameters. A search
 with no parameters lists all available books in the database.
 
 ###### Parameters
 | Name                  | Type        | In   | Description                                              |
 | :-------------------- | :---------- | :--- | :------------------------------------------------------- |
+| **TitlesOnly**        | boolean     | URL  | If specifed, returns a list of titles instead of books.  |
 | **TitleHas**          | string      | URL  | A sub-string that must exist in the title.               |
 | **Authors**           | string list | URL  | Must have one of these authors.                          |
 | **LanguageCode**      | string list | URL  | Must be written in one of these languages.               |
@@ -59,15 +60,13 @@ with no parameters lists all available books in the database.
 | **ReviewsCountCeil**  | int         | URL  | Number of reviews must be less than or equal.            |
 | **ReviewsCountFloor** | int         | URL  | Number of reviews must be higher than.                   |
 
-#### Example
-The following request (using goodreads's dataset.)
-
+#### Examples
+Request:
 ```console
 /books?TitleHas=War&Authors=Leo&PagesFloor=1000&RatingsCountFloor=20000
 ```
 
-Produces the following response.
-
+Response:
 ```json
 [
 	{
@@ -82,5 +81,21 @@ Produces the following response.
 		"RatingsCount": 201919,
 		"ReviewsCount": 5903
 	}
+]
+```
+
+Request:
+```console
+/books?Authors=Jane%20Austen&RatingsCountFloor=10000&TitlesOnly=true
+```
+
+Response:
+```json
+[
+	"Pride and Prejudice",
+	"Persuasion",
+	"Emma",
+	"The Complete Novels",
+	"Mansfield Park"
 ]
 ```
