@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
@@ -27,23 +28,16 @@ type messageResponse struct {
 func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	books, err := books.SearchByTitle(&books.SearchIn{
-		Datastore: s.searchIn.Datastore,
-		BookTable: s.searchIn.BookTable,
-	}, vars["title"])
+	books, err := books.SearchByTitle(
+		&books.SearchIn{
+			Datastore: s.searchIn.Datastore,
+			BookTable: s.searchIn.BookTable,
+		}, vars["title"])
 
 	if err != nil {
-		errorResponse("Search failed.", w, r)
+		writeError("Search failed.", w, r)
 	} else {
-		response, err := json.MarshalIndent(books, "", "\t")
-		if err != nil {
-			errorResponse("Search failed.", w, r)
-		} else {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-
-			fmt.Fprint(w, string(response))
-		}
+		writeResponse(books, w, r)
 	}
 }
 
@@ -65,46 +59,80 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 		ReviewsCountFloor: -1,
 	}
 
-	err := decoder.Decode(searchBy, r.URL.Query())
+	titlesOnly, parameters := isTitlesOnly(r.URL.Query())
+
+	err := decoder.Decode(searchBy, parameters)
 	if err != nil {
-		errorResponse("Invalid request url.", w, r)
+		writeError(err.Error(), w, r)
 	} else {
-		books, err := books.Search(&books.SearchIn{
-			Datastore: s.searchIn.Datastore,
-			BookTable: s.searchIn.BookTable,
-		}, searchBy)
+		if titlesOnly {
+			titles, err := books.SearchForTitles(
+				&books.SearchIn{
+					Datastore: s.searchIn.Datastore,
+					BookTable: s.searchIn.BookTable,
+				}, searchBy)
 
-		if err != nil {
-			errorResponse("Search failed.", w, r)
-		} else {
-			response, err := json.MarshalIndent(books, "", "\t")
 			if err != nil {
-				errorResponse("Search failed.", w, r)
+				writeError("Search failed.", w, r)
 			} else {
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusOK)
+				writeResponse(titles, w, r)
+			}
+		} else {
+			books, err := books.Search(
+				&books.SearchIn{
+					Datastore: s.searchIn.Datastore,
+					BookTable: s.searchIn.BookTable,
+				}, searchBy)
 
-				fmt.Fprint(w, string(response))
+			if err != nil {
+				writeError("Search failed.", w, r)
+			} else {
+				writeResponse(books, w, r)
 			}
 		}
 	}
 }
 
-// errorResponse responds to a request with an error message using
+// writeResponse writes a JSON response to a request.
+func writeResponse(toWrite interface{}, w http.ResponseWriter, r *http.Request) {
+	response, err := json.MarshalIndent(toWrite, "", "\t")
+	if err != nil {
+		writeError("Search failed.", w, r)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, string(response))
+	}
+}
+
+// writeError responds to a request with an error message using
 // the given writer, and logs the error.
-func errorResponse(message string, w http.ResponseWriter, r *http.Request) {
+func writeError(message string, w http.ResponseWriter, r *http.Request) {
 	log.WithFields(
 		log.Fields{
-			"IP":     r.RemoteAddr,
-			"Method": r.Method,
-			"URL":    r.URL.String(),
+			"Address": r.RemoteAddr,
+			"Method":  r.Method,
+			"URL":     r.URL.String(),
 		},
 	).Info(message)
-
-	response, _ := json.MarshalIndent(&messageResponse{message}, "", "\t")
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
 
-	fmt.Fprint(w, string(response))
+	response, err := json.MarshalIndent(&messageResponse{message}, "", "\t")
+	if err == nil { // Just for safety as there are no cyclic structures.
+		fmt.Fprint(w, string(response))
+	}
+}
+
+// isTitlesOnly checks query parameters to see if TitlesOnly was specified. If
+// so returns true and the query parameters with "TitlesOnly" key removed, else
+// returns false and parameters without change.
+func isTitlesOnly(query url.Values) (bool, url.Values) {
+	titlesOnly := query.Get("TitlesOnly") == "true" || query.Get("TitlesOnly") == "True"
+	if titlesOnly {
+		query.Del("TitlesOnly")
+	}
+
+	return titlesOnly, query
 }
