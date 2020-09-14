@@ -41,13 +41,13 @@ jobs:
       run: go test -v -bench=. .
       working-directory: internal/datastore
 
-    - name: Build internal/books
+    - name: Build pkg/books
       run: go build -v .
-      working-directory: internal/books
+      working-directory: pkg/books
 
-    - name: Test internal/books
+    - name: Test pkg/books
       run: go test -v -bench=. .
-      working-directory: internal/books
+      working-directory: pkg/books
 
     - name: Build internal/server
       run: go build -v .
