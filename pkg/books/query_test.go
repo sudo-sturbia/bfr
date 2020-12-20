@@ -7,11 +7,10 @@ import (
 // Test query generation based on SearchBy.
 func TestQuery(t *testing.T) {
 	searchIn := &SearchIn{
-		Datastore: nil,
 		BookTable: "books",
 	}
 
-	searchQueries := map[*SearchBy]string{
+	for s, sq := range map[*SearchBy]string{
 		&SearchBy{
 			TitleHas:          "aaa",
 			Authors:           nil,
@@ -304,9 +303,7 @@ func TestQuery(t *testing.T) {
 			"pages <= ? and pages > ? and " +
 			"ratingsCount <= ? and ratingsCount > ? and " +
 			"reviewsCount <= ? and reviewsCount > ?;",
-	}
-
-	for s, sq := range searchQueries {
+	} {
 		if q, _ := query(searchIn, s, false); q != sq {
 			t.Errorf("Expected \"%s\", Found \"%s\".", sq, q)
 		}
@@ -316,11 +313,10 @@ func TestQuery(t *testing.T) {
 // Test parameters of queries generated based on SearchBy.
 func TestQueryParameters(t *testing.T) {
 	searchIn := &SearchIn{
-		Datastore: nil,
 		BookTable: "books",
 	}
 
-	searchQueries := map[*SearchBy][]interface{}{
+	for s, sp := range map[*SearchBy][]interface{}{
 		&SearchBy{
 			TitleHas:          "aaa",
 			Authors:           nil,
@@ -608,11 +604,24 @@ func TestQueryParameters(t *testing.T) {
 			ReviewsCountCeil:  1000,
 			ReviewsCountFloor: 500,
 		}: []interface{}{"%aaa%", "%a%", "%b%", "%c%", "%a%", "%b%", "0123456789", "0123456789abc", float32(4.5), float32(2), 200, 20, 1000, 500, 1000, 500},
-	}
-
-	for s, sp := range searchQueries {
-		if _, p := query(searchIn, s, false); !compareSlices(p, sp) {
+	} {
+		if _, p := query(searchIn, s, false); !compareSlices(t, p, sp) {
 			t.Errorf("Expected \"%s\", Found \"%s\".", sp, p)
 		}
 	}
+}
+
+// compareSlices returns true if a and b are equal, false otherwise.
+func compareSlices(t *testing.T, a, b []interface{}) bool {
+	t.Helper()
+
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }

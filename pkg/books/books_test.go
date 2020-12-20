@@ -37,7 +37,7 @@ func TestSearchByTitle(t *testing.T) {
 		BookTable: config.BookTable,
 	}
 
-	books := map[string]*Book{
+	for name, book := range map[string]*Book{
 		"Harry Potter and the Chamber of Secrets (Harry Potter  #2)": &Book{
 			ID:            4,
 			Title:         "Harry Potter and the Chamber of Secrets (Harry Potter  #2)",
@@ -63,9 +63,7 @@ func TestSearchByTitle(t *testing.T) {
 			RatingsCount:  228522,
 			ReviewsCount:  8840,
 		},
-	}
-
-	for name, book := range books {
+	} {
 		result, err := SearchByTitle(searchIn, name)
 		if err != nil {
 			t.Errorf("Search failed.")
@@ -110,7 +108,7 @@ func TestSearch(t *testing.T) {
 		BookTable: config.BookTable,
 	}
 
-	books := map[*SearchBy][]*Book{
+	for searchBy, book := range map[*SearchBy][]*Book{
 		&SearchBy{
 			TitleHas:          "Secrets",
 			Authors:           nil,
@@ -239,9 +237,7 @@ func TestSearch(t *testing.T) {
 			ReviewsCountCeil:  -1,
 			ReviewsCountFloor: -1,
 		}: []*Book{},
-	}
-
-	for searchBy, book := range books {
+	} {
 		result, err := Search(searchIn, searchBy)
 		if err != nil {
 			t.Errorf("Search failed.")
@@ -288,7 +284,7 @@ func TestSearchForTitles(t *testing.T) {
 		BookTable: config.BookTable,
 	}
 
-	titles := map[*SearchBy][]string{
+	for searchBy, title := range map[*SearchBy][]string{
 		&SearchBy{
 			TitleHas:          "Secrets",
 			Authors:           nil,
@@ -360,9 +356,7 @@ func TestSearchForTitles(t *testing.T) {
 			ReviewsCountCeil:  -1,
 			ReviewsCountFloor: -1,
 		}: []string{},
-	}
-
-	for searchBy, title := range titles {
+	} {
 		result, err := SearchForTitles(searchIn, searchBy)
 		if err != nil {
 			t.Errorf("Search failed.")
@@ -380,19 +374,4 @@ func TestSearchForTitles(t *testing.T) {
 			}
 		}
 	}
-}
-
-// compareSlices returns true if a and b are equal, false otherwise.
-func compareSlices(a, b []interface{}) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-
-	return true
 }
