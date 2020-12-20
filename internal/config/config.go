@@ -1,4 +1,5 @@
-package main
+// package config handles server's configuration.
+package config
 
 import (
 	"fmt"
@@ -15,10 +16,12 @@ type Config struct {
 	Datastore *datastore.Config // Datastore's configuration options.
 }
 
-// newConfig returns a new configuration object with initialized fields,
-// and sets global logger's configuration options.
-func newConfig() *Config {
-	configLogger()
+// New returns a new Config object with initialized fields, and sets
+// logger's options.
+func New() *Config {
+	log.SetFormatter(new(log.JSONFormatter))
+	log.SetOutput(os.Stderr)
+
 	return &Config{
 		Server: &server.Config{
 			Host: "",
@@ -32,10 +35,4 @@ func newConfig() *Config {
 			BookTable: "books",
 		},
 	}
-}
-
-// configLogger sets global logger's configuration options.
-func configLogger() {
-	log.SetFormatter(new(log.JSONFormatter))
-	log.SetOutput(os.Stderr)
 }

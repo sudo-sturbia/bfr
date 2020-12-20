@@ -7,25 +7,26 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/sudo-sturbia/bfr/internal/config"
 	"github.com/sudo-sturbia/bfr/internal/datastore"
 	"github.com/sudo-sturbia/bfr/internal/server"
 )
 
 var (
-	config = newConfig()
+	cfg = config.New()
 )
 
 func main() {
 	parseFlags()
 
-	datastore, err := datastore.Open(config.Datastore)
+	datastore, err := datastore.Open(cfg.Datastore)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	server := server.New(config.Server, &server.SearchIn{
+	server := server.New(cfg.Server, &server.SearchIn{
 		Datastore: datastore,
-		BookTable: config.Datastore.BookTable,
+		BookTable: cfg.Datastore.BookTable,
 	})
 
 	server.Run()
@@ -66,13 +67,13 @@ func description() {
 
 // specifyPort updates the port that the server runs on.
 func specifyPort(port string) {
-	config.Server.Port = port
+	cfg.Server.Port = port
 }
 
 // createDatastore creates a new datastore using dataset at specified
 // path. Datastore is created at position specified by Config.
 func createDatastore(dataset string) {
-	err := datastore.New(dataset, config.Datastore, true)
+	err := datastore.New(dataset, cfg.Datastore, true)
 	if err != nil {
 		log.Fatalf("Failed to create a datastore: %s.", err.Error())
 	}
