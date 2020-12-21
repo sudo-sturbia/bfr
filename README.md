@@ -1,7 +1,7 @@
 # bfr
-bfr, a weird abbreviation of book finder, pronounced buffer, is a book searching
-REST API. bfr is capable of finding books using their titles or, more interestingly,
-using a set of search parameters.
+bfr, short for book finder, pronounced buffer, is a book searching web server /
+REST API. bfr is capable of searching for books using their titles or, more
+interestingly, using a set of search parameters.
 
 ## How To Install?
 ```
@@ -10,12 +10,12 @@ GO111MODULE=on go get github.com/sudo-sturbia/bfr
 
 ## How To Use?
 ```
-bfr is a REST API to search for books using a set of parameters.
+bfr is a web server that enables searching for books using a set of parameters.
 Usage:
-    bfr                 Runs as a web server at :6060.
-    bfr -dataset path   Loads a new csv dataset to use as a datastore, then runs the server.
-    bfr -port <number>  Specifies a different port to run the server on.
-    bfr -h              Prints a help message.
+    bfr                 Run as a web server at :6060.
+    bfr -dataset path   Load a new csv dataset to use as a datastore, then runs the server.
+    bfr -port <number>  Use the specified port to run the server.
+    bfr -h              Print a help message.
 
 See github.com/sudo-sturbia/bfr.
 ```
