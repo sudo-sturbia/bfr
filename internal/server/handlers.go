@@ -32,7 +32,9 @@ func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
 		&books.SearchIn{
 			Datastore: s.searchIn.Datastore,
 			BookTable: s.searchIn.BookTable,
-		}, vars["title"])
+		},
+		vars["title"],
+	)
 
 	if err != nil {
 		writeError("Search failed.", w, r)
@@ -65,25 +67,20 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(err.Error(), w, r)
 	} else {
-		if titlesOnly {
-			titles, err := books.SearchForTitles(
-				&books.SearchIn{
-					Datastore: s.searchIn.Datastore,
-					BookTable: s.searchIn.BookTable,
-				}, searchBy)
+		searchIn := &books.SearchIn{
+			Datastore: s.searchIn.Datastore,
+			BookTable: s.searchIn.BookTable,
+		}
 
+		if titlesOnly {
+			titles, err := books.SearchForTitles(searchIn, searchBy)
 			if err != nil {
 				writeError("Search failed.", w, r)
 			} else {
 				writeResponse(titles, w, r)
 			}
 		} else {
-			books, err := books.Search(
-				&books.SearchIn{
-					Datastore: s.searchIn.Datastore,
-					BookTable: s.searchIn.BookTable,
-				}, searchBy)
-
+			books, err := books.Search(searchIn, searchBy)
 			if err != nil {
 				writeError("Search failed.", w, r)
 			} else {
