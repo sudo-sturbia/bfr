@@ -13,8 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Columns is number of dataset's columns.
-const Columns = 10
+// columns is number of dataset's columns.
+const columns = 10
 
 // Config holds datastore's configuration options.
 type Config struct {
@@ -107,7 +107,7 @@ func insertBooks(dataset *os.File, tx *sql.Tx, config *Config) error {
 			return c == ','
 		})
 
-		if len(fields) != Columns {
+		if len(fields) != columns {
 			log.WithFields(
 				log.Fields{
 					"line":   line,
