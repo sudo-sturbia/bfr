@@ -1,6 +1,6 @@
-// Package server is used to create, and run a new, initialized
-// server instance.
-package server
+// Package api is used to create, and run a new, initialized
+// backend server instance.
+package api
 
 import (
 	"database/sql"

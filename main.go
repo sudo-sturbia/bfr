@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/sudo-sturbia/bfr/internal/api"
 	"github.com/sudo-sturbia/bfr/internal/config"
 	"github.com/sudo-sturbia/bfr/internal/datastore"
-	"github.com/sudo-sturbia/bfr/internal/server"
 )
 
 var (
@@ -37,8 +37,8 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	server := server.New(
-		cfg.Server, &server.SearchIn{
+	server := api.New(
+		cfg.Server, &api.SearchIn{
 			Datastore: datastore,
 			BookTable: cfg.Datastore.BookTable,
 		},
