@@ -1,4 +1,4 @@
-// Package main runs a server instance.
+// Package main runs a backend server instance.
 package main
 
 import (
@@ -49,14 +49,14 @@ func main() {
 
 // usage prints a help message.
 func usage() {
-	fmt.Printf(
-		"%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n",
-		"bfr is a web server that enables searching for books using a set of parameters.",
-		"Usage:",
-		"    bfr                 Run as a web server at :6060.",
-		"    bfr -dataset path   Load a new csv dataset to use as a datastore, then runs the server.",
-		"    bfr -port <number>  Use the specified port to run the server.",
-		"    bfr -h              Print a help message.",
+	fmt.Println(
+		"A REST API that enables searching for books using a set of parameters.\n",
+		"Usage:\n",
+		"    go run ./cmd/api                 Run a backend server at localhost:6060.\n",
+		"    go run ./cmd/api -dataset path   Load a new csv dataset to use as a datastore, then run the server.\n",
+		"    go run ./cmd/api -port <number>  Use the specified port to run the server.\n",
+		"    go run ./cmd/api -h              Print a help message.\n",
+		"\n",
 		"See github.com/sudo-sturbia/bfr.",
 	)
 }
