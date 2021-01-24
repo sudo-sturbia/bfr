@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	port    = flag.String("port", "", "Specify a port to run the server on.")
+	port    = flag.String("port", "6060", "Specify a port to run the server on.")
 	dataset = flag.String("dataset", "", "Load a new csv dataset from specified path.")
 )
 
@@ -20,11 +20,7 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	cfg := config.New()
-
-	if *port != "" {
-		cfg.Port = *port
-	}
+	cfg := config.NewOnPort(*port)
 	if *dataset != "" {
 		err := datastore.New(*dataset, cfg.Datastore, true)
 		if err != nil {

@@ -16,15 +16,19 @@ type Config struct {
 	Datastore *datastore.Config // Datastore's configuration options.
 }
 
-// New returns a new Config object with initialized fields, and sets
-// logger's options.
+// New returns a new Config object with Port as 6060.
 func New() *Config {
+	return NewOnPort("6060")
+}
+
+// NewOnPort returns a new Config object with Port set to given.
+func NewOnPort(port string) *Config {
 	log.SetFormatter(new(log.JSONFormatter))
 	log.SetOutput(os.Stderr)
 
 	return &Config{
 		Host: "",
-		Port: "6060",
+		Port: port,
 		Datastore: &datastore.Config{
 			Driver:    "sqlite3",
 			Dir:       fmt.Sprintf("%s/.config/bfr/", os.Getenv("HOME")),
