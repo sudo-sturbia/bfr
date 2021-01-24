@@ -1,0 +1,34 @@
+html {
+    height: 100%;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    font-size: 20px;
+    line-height: 25px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    height: 100%;
+    width: 80%;
+
+    background-color: #f4f7f7;
+    color: #2a363b;
+}
+
+/* Footer. */
+body > footer {
+    text-align: right;
+    margin-top: 20px;
+}
+
+body > footer > a {
+    outline: none;
+    text-decoration: none;
+}
+
+body > footer > a:link,
+body > footer > a:visited {
+    color: #79a8a9;
+}
