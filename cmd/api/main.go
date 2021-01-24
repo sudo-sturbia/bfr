@@ -23,7 +23,7 @@ func main() {
 	cfg := config.New()
 
 	if *port != "" {
-		cfg.Server.Port = *port
+		cfg.Port = *port
 	}
 	if *dataset != "" {
 		err := datastore.New(*dataset, cfg.Datastore, true)
@@ -38,7 +38,11 @@ func main() {
 	}
 
 	server := api.New(
-		cfg.Server, &api.SearchIn{
+		&api.Config{
+			Host: cfg.Host,
+			Port: cfg.Port,
+		},
+		&api.SearchIn{
 			Datastore: datastore,
 			BookTable: cfg.Datastore.BookTable,
 		},

@@ -6,13 +6,13 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/sudo-sturbia/bfr/internal/api"
 	"github.com/sudo-sturbia/bfr/internal/datastore"
 )
 
 // Config holds all configuration needed to run the server.
 type Config struct {
-	Server    *api.Config       // Server's configuration options.
+	Host      string            // Host to run the server on.
+	Port      string            // Port to run the server on.
 	Datastore *datastore.Config // Datastore's configuration options.
 }
 
@@ -23,11 +23,8 @@ func New() *Config {
 	log.SetOutput(os.Stderr)
 
 	return &Config{
-		Server: &api.Config{
-			Host: "",
-			Port: "6060",
-		},
-
+		Host: "",
+		Port: "6060",
 		Datastore: &datastore.Config{
 			Driver:    "sqlite3",
 			Dir:       fmt.Sprintf("%s/.config/bfr/", os.Getenv("HOME")),
