@@ -31,7 +31,7 @@ select {
 }
 
 .title-has {
-    grid-column: 1/6;
+    grid-column: 1/5;
     grid-row: 1;
 
     font-size: 18px;
@@ -42,6 +42,24 @@ select {
     width: 100%;
 
     margin: auto auto auto auto;
+}
+
+.submit {
+    grid-column: 5/6;
+    grid-row: 1;
+
+    font-size: 15px;
+    line-height: 18px;
+    text-align: center;
+
+    height: 30px;
+    width: 150px;
+
+    margin: auto auto auto auto;
+
+    border-color: #2a363b;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 7px;
 }
 
 .author-label {
