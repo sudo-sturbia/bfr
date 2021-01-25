@@ -3,15 +3,19 @@ html {
 }
 
 body {
-    font-family: 'Lato', sans-serif;
-    font-size: 20px;
-    line-height: 25px;
+    display: grid;
+    gap: 25px 25px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 9fr 1fr;
 
-    margin-left: auto;
-    margin-right: auto;
+
+    font-family: 'Lato', sans-serif;
+    font-size: 18px;
+    line-height: 20px;
 
     height: 100%;
-    width: 80%;
+    width: 60%;
+    margin: auto auto auto auto;
 
     background-color: #f4f7f7;
     color: #2a363b;
