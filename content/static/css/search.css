@@ -53,7 +53,8 @@ select {
     text-align: center;
 
     height: 30px;
-    width: 150px;
+    width: 80%;
+    min-width: 70px;
 
     margin: auto auto auto auto;
 
@@ -107,12 +108,12 @@ select {
     grid-row: 6;
 }
 
-.rating-ceil {
+.rating-floor {
     grid-column: 3/4;
     grid-row: 6;
 }
 
-.rating-floor {
+.rating-ceil {
     grid-column: 4/5;
     grid-row: 6;
 }
@@ -122,12 +123,12 @@ select {
     grid-row: 7;
 }
 
-.pages-ceil {
+.pages-floor {
     grid-column: 3/4;
     grid-row: 7;
 }
 
-.pages-floor {
+.pages-ceil {
     grid-column: 4/5;
     grid-row: 7;
 }
@@ -137,12 +138,12 @@ select {
     grid-row: 8;
 }
 
-.count-ceil {
+.count-floor {
     grid-column: 3/4;
     grid-row: 8;
 }
 
-.count-floor {
+.count-ceil {
     grid-column: 4/5;
     grid-row: 8;
 }
@@ -152,12 +153,12 @@ select {
     grid-row: 9;
 }
 
-.reviews-ceil {
+.reviews-floor {
     grid-column: 3/4;
     grid-row: 9;
 }
 
-.reviews-floor {
+.reviews-ceil {
     grid-column: 4/5;
     grid-row: 9;
 }
