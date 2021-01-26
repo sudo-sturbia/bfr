@@ -12,30 +12,8 @@ import (
 
 // Test searching for books by title.
 func TestSearchByTitle(t *testing.T) {
-	config := &datastore.Config{
-		Driver:    "sqlite3",
-		Datastore: "testDatastore.db",
-		BookTable: "books",
-	}
-
-	err := datastore.New("../../test-data/booksTest.csv", config, true)
-	if err != nil {
-		t.Errorf("Couldn't load datastore: %s.", err.Error())
-		return
-	}
-
-	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s", config.Datastore))
-	if err != nil {
-		t.Errorf(err.Error())
-		return
-	}
-	defer datastore.Close()
-	defer os.Remove(config.Datastore)
-
-	searchIn := &SearchIn{
-		Datastore: datastore,
-		BookTable: config.BookTable,
-	}
+	searchIn, deferFn := testingSearchIn(t)
+	defer deferFn()
 
 	for name, book := range map[string]*Book{
 		"Harry Potter and the Chamber of Secrets (Harry Potter  #2)": &Book{
@@ -66,47 +44,21 @@ func TestSearchByTitle(t *testing.T) {
 	} {
 		result, err := SearchByTitle(searchIn, name)
 		if err != nil {
-			t.Errorf("Search failed.")
-			continue
-		}
-
-		if len(result) != 1 {
-			t.Errorf("Expected %d search result, Found %d.", 1, len(result))
-			continue
-		}
-
-		if *result[0] != *book {
-			t.Errorf("Incorrect search result for %s.", name)
+			t.Errorf("search failed: %s", err.Error())
+		} else {
+			if len(result) != 1 {
+				t.Errorf("expected: %d search result, got: %d.", 1, len(result))
+			} else if *result[0] != *book {
+				t.Errorf("incorrect search result for %s.", name)
+			}
 		}
 	}
 }
 
 // Test searching using a SearchBy.
 func TestSearch(t *testing.T) {
-	config := &datastore.Config{
-		Driver:    "sqlite3",
-		Datastore: "testDatastore.db",
-		BookTable: "books",
-	}
-
-	err := datastore.New("../../test-data/booksTest.csv", config, true)
-	if err != nil {
-		t.Errorf("Couldn't load datastore: %s.", err.Error())
-		return
-	}
-
-	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s", config.Datastore))
-	if err != nil {
-		t.Errorf(err.Error())
-		return
-	}
-	defer datastore.Close()
-	defer os.Remove(config.Datastore)
-
-	searchIn := &SearchIn{
-		Datastore: datastore,
-		BookTable: config.BookTable,
-	}
+	searchIn, deferFn := testingSearchIn(t)
+	defer deferFn()
 
 	for searchBy, book := range map[*SearchBy][]*Book{
 		&SearchBy{
@@ -240,18 +192,16 @@ func TestSearch(t *testing.T) {
 	} {
 		result, err := Search(searchIn, searchBy)
 		if err != nil {
-			t.Errorf("Search failed.")
-			continue
-		}
-
-		if len(result) != len(book) {
-			t.Errorf("Expected %d search result, Found %d.", 1, len(result))
-			continue
-		}
-
-		for i, res := range result {
-			if *res != *book[i] {
-				t.Errorf("Incorrect search result for %s.", book[i].Title)
+			t.Errorf("search failed: %s", err.Error())
+		} else {
+			if len(result) != len(book) {
+				t.Errorf("expected: %d search result, got: %d", 1, len(result))
+			} else {
+				for i, res := range result {
+					if *res != *book[i] {
+						t.Errorf("incorrect search result for %s", book[i].Title)
+					}
+				}
 			}
 		}
 	}
@@ -259,30 +209,8 @@ func TestSearch(t *testing.T) {
 
 // Test searching for books' titles using SearchBy.
 func TestSearchForTitles(t *testing.T) {
-	config := &datastore.Config{
-		Driver:    "sqlite3",
-		Datastore: "testDatastore.db",
-		BookTable: "books",
-	}
-
-	err := datastore.New("../../test-data/booksTest.csv", config, true)
-	if err != nil {
-		t.Errorf("Couldn't load datastore: %s.", err.Error())
-		return
-	}
-
-	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s", config.Datastore))
-	if err != nil {
-		t.Errorf(err.Error())
-		return
-	}
-	defer datastore.Close()
-	defer os.Remove(config.Datastore)
-
-	searchIn := &SearchIn{
-		Datastore: datastore,
-		BookTable: config.BookTable,
-	}
+	searchIn, deferFn := testingSearchIn(t)
+	defer deferFn()
 
 	for searchBy, title := range map[*SearchBy][]string{
 		&SearchBy{
@@ -359,19 +287,48 @@ func TestSearchForTitles(t *testing.T) {
 	} {
 		result, err := SearchForTitles(searchIn, searchBy)
 		if err != nil {
-			t.Errorf("Search failed.")
-			continue
-		}
-
-		if len(result) != len(title) {
-			t.Errorf("Expected %d search result, Found %d.", 1, len(result))
-			continue
-		}
-
-		for i, res := range result {
-			if res != title[i] {
-				t.Errorf("Incorrect search result for %s.", title[i])
+			t.Errorf("search failed: %s", err.Error())
+		} else {
+			if len(result) != len(title) {
+				t.Errorf("expected: %d search result, got: %d", 1, len(result))
+			} else {
+				for i, res := range result {
+					if res != title[i] {
+						t.Errorf("incorrect search result for %s", title[i])
+					}
+				}
 			}
 		}
 	}
+}
+
+// testingSearchIn returns a SearchIn to use for tests, and a func
+// that frees resources, and should be defered.
+func testingSearchIn(t *testing.T) (*SearchIn, func()) {
+	t.Helper()
+	config := &datastore.Config{
+		Driver:    "sqlite3",
+		Datastore: "testDatastore.db",
+		BookTable: "books",
+	}
+
+	err := datastore.New("../../test-data/booksTest.csv", config, true)
+	if err != nil {
+		t.Fatalf("couldn't load datastore: %s.", err.Error())
+	}
+
+	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s", config.Datastore))
+	if err != nil {
+		t.Fatalf("failed to open database: %s", err.Error())
+	}
+
+	deferFn := func() {
+		datastore.Close()
+		os.Remove(config.Datastore)
+	}
+
+	return &SearchIn{
+		Datastore: datastore,
+		BookTable: config.BookTable,
+	}, deferFn
 }
