@@ -3,14 +3,13 @@
     <head>
         <meta charset="utf-8">
         <meta name="author" content="Zyad A. Ali">
-        <meta name="description" content="bfr Homepage.">
 
-        <link rel="stylesheet" href="../css/base.css">
+        <link rel="stylesheet" href="/static/css/base.css">
 
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&display=swap">
 
-        <title>bfr - book finder</title>
+        {{block "head-content" .}}{{end}}
     </head>
     <body>
         {{block "page-content" .}}{{end}}
