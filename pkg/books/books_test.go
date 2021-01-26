@@ -10,6 +10,51 @@ import (
 	"github.com/sudo-sturbia/bfr/internal/datastore"
 )
 
+// Test searching for books using IDs.
+func TestSearchByID(t *testing.T) {
+	searchIn, deferFn := testingSearchIn(t)
+	defer deferFn()
+
+	for id, book := range map[int]*Book{
+		4: &Book{
+			ID:            4,
+			Title:         "Harry Potter and the Chamber of Secrets (Harry Potter  #2)",
+			Authors:       "J.K. Rowling",
+			AverageRating: 4.41,
+			ISBN:          "439554896",
+			ISBN13:        "9780439554893",
+			LanguageCode:  "eng",
+			Pages:         352,
+			RatingsCount:  6267,
+			ReviewsCount:  272,
+		},
+		14: &Book{
+			ID:            14,
+			Title:         "The Hitchhiker's Guide to the Galaxy (Hitchhiker's Guide to the Galaxy  #1)",
+			Authors:       "Douglas Adams",
+			AverageRating: 4.22,
+			ISBN:          "1400052920",
+			ISBN13:        "9781400052929",
+			LanguageCode:  "eng",
+			Pages:         215,
+			RatingsCount:  4416,
+			ReviewsCount:  408,
+		},
+		30: nil,
+	} {
+		result, err := SearchByID(searchIn, id)
+		if err != nil && result != nil {
+			t.Errorf("search failed: %s", err.Error())
+		} else if err == nil && result == nil {
+			t.Errorf("expected error, got: %v", err)
+		} else {
+			if result != book && *result != *book {
+				t.Errorf("expected: %v, got: %v", book, result)
+			}
+		}
+	}
+}
+
 // Test searching for books by title.
 func TestSearchByTitle(t *testing.T) {
 	searchIn, deferFn := testingSearchIn(t)
