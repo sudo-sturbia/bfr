@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
@@ -24,16 +25,35 @@ type messageResponse struct {
 	Message string
 }
 
+// searchByID is a handler for /book/:id endpoint.
+func (s *Server) searchByID(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		writeError(fmt.Sprintf("Invalid id \"%s\".", mux.Vars(r)["id"]), w, r)
+	} else {
+		book, err := books.SearchByID(
+			&books.SearchIn{
+				Datastore: s.searchIn.Datastore,
+				BookTable: s.searchIn.BookTable,
+			},
+			id,
+		)
+		if err != nil {
+			writeError("Search failed.", w, r)
+		} else {
+			writeResponse(book, w, r)
+		}
+	}
+}
+
 // searchByTitle is a handler for /books/:title endpoint.
 func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
 	books, err := books.SearchByTitle(
 		&books.SearchIn{
 			Datastore: s.searchIn.Datastore,
 			BookTable: s.searchIn.BookTable,
 		},
-		vars["title"],
+		mux.Vars(r)["title"],
 	)
 
 	if err != nil {

@@ -42,6 +42,7 @@ func New(cfg *Config, searchIn *SearchIn) *Server {
 		router:   mux.NewRouter(),
 	}
 
+	s.router.HandleFunc("/book/{id}", s.searchByID).Methods("GET")
 	s.router.HandleFunc("/books/{title}", s.searchByTitle).Methods("GET")
 	s.router.HandleFunc("/books", s.search).Methods("GET")
 
