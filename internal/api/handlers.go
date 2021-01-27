@@ -18,113 +18,135 @@ var (
 	decoder = schema.NewDecoder()
 )
 
-// messageResponse is a string response meant to be used as an error
-// message wrapper to be sent as a JSON object if a request fails to
-// execute.
-type messageResponse struct {
+// errorResponse is an error message wrapper meant to be used as a JSON response
+// to requests in case of errors.
+type errorResponse struct {
 	Message string
 }
 
-// searchByID is a handler for /book/:id endpoint.
+// searchByID is a handler for /book/{id} endpoint.
 func (s *Server) searchByID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(mux.Vars(r)["id"])
-	if err != nil {
-		writeError(fmt.Sprintf("Invalid id \"%s\".", mux.Vars(r)["id"]), w, r)
-	} else {
-		book, err := books.SearchByID(
-			&books.SearchIn{
-				Datastore: s.searchIn.Datastore,
-				BookTable: s.searchIn.BookTable,
-			},
-			id,
-		)
-		if err != nil {
-			writeError("Search failed.", w, r)
-		} else {
-			writeResponse(book, w, r)
-		}
-	}
+	response, status := searchByIDResponse(s.searchIn, mux.Vars(r)["id"])
+	write(w, r, response, status)
 }
 
-// searchByTitle is a handler for /books/:title endpoint.
+// searchByTitle is a handler for /books/{title} endpoint.
 func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
-	books, err := books.SearchByTitle(
-		&books.SearchIn{
-			Datastore: s.searchIn.Datastore,
-			BookTable: s.searchIn.BookTable,
-		},
-		mux.Vars(r)["title"],
-	)
-
-	if err != nil {
-		writeError("Search failed.", w, r)
-	} else {
-		writeResponse(books, w, r)
-	}
+	response, status := searchByTitleResponse(s.searchIn, mux.Vars(r)["title"])
+	write(w, r, response, status)
 }
 
 // search is a handler for /books endpoint.
 func (s *Server) search(w http.ResponseWriter, r *http.Request) {
-	searchBy := &books.SearchBy{
-		TitleHas:          "",
-		Authors:           nil,
-		LanguageCode:      nil,
-		ISBN:              "",
-		ISBN13:            "",
-		RatingCeil:        -1,
-		RatingFloor:       -1,
-		PagesCeil:         -1,
-		PagesFloor:        -1,
-		RatingsCountCeil:  -1,
-		RatingsCountFloor: -1,
-		ReviewsCountCeil:  -1,
-		ReviewsCountFloor: -1,
+	response, status := searchResponse(
+		r.URL.Query(),
+		s.searchIn,
+		&books.SearchBy{
+			TitleHas:          "",
+			Authors:           nil,
+			LanguageCode:      nil,
+			ISBN:              "",
+			ISBN13:            "",
+			RatingCeil:        -1,
+			RatingFloor:       -1,
+			PagesCeil:         -1,
+			PagesFloor:        -1,
+			RatingsCountCeil:  -1,
+			RatingsCountFloor: -1,
+			ReviewsCountCeil:  -1,
+			ReviewsCountFloor: -1,
+		},
+	)
+	write(w, r, response, status)
+}
+
+// searchByIDResponse searchs the database for books based on given parameters and
+// returns a response and a status code. It should be used by Server.searchByID.
+func searchByIDResponse(searchIn *SearchIn, idString string) (interface{}, int) {
+	id, err := strconv.Atoi(idString)
+	if err != nil {
+		return &errorResponse{fmt.Sprintf("Invalid id \"%s\".", idString)}, http.StatusBadRequest
 	}
 
-	titlesOnly, parameters := isTitlesOnly(r.URL.Query())
+	book, err := books.SearchByID(
+		&books.SearchIn{
+			Datastore: searchIn.Datastore,
+			BookTable: searchIn.BookTable,
+		},
+		id,
+	)
+	if err != nil {
+		return &errorResponse{"Search failed."}, http.StatusBadRequest
+	}
+	return book, http.StatusOK
+}
 
+// searchByTitleResponse searchs the database for books based on given parameters and
+// returns a response and a status code. It should be used by Server.searchByTitle.
+func searchByTitleResponse(searchIn *SearchIn, title string) (interface{}, int) {
+	books, err := books.SearchByTitle(
+		&books.SearchIn{
+			Datastore: searchIn.Datastore,
+			BookTable: searchIn.BookTable,
+		},
+		title,
+	)
+
+	if err != nil {
+		return &errorResponse{"Search failed."}, http.StatusBadRequest
+	}
+	return books, http.StatusOK
+}
+
+// searchResponse searchs the database for books based on given parameters and returns
+// a response and a status code. It should be used by Server.search.
+func searchResponse(query url.Values, searchIn *SearchIn, searchBy *books.SearchBy) (interface{}, int) {
+	titlesOnly, parameters := isTitlesOnly(query)
 	err := decoder.Decode(searchBy, parameters)
 	if err != nil {
-		writeError(err.Error(), w, r)
-	} else {
-		searchIn := &books.SearchIn{
-			Datastore: s.searchIn.Datastore,
-			BookTable: s.searchIn.BookTable,
-		}
-
-		if titlesOnly {
-			titles, err := books.SearchForTitles(searchIn, searchBy)
-			if err != nil {
-				writeError("Search failed.", w, r)
-			} else {
-				writeResponse(titles, w, r)
-			}
-		} else {
-			books, err := books.Search(searchIn, searchBy)
-			if err != nil {
-				writeError("Search failed.", w, r)
-			} else {
-				writeResponse(books, w, r)
-			}
-		}
+		return &errorResponse{err.Error()}, http.StatusBadRequest
 	}
-}
 
-// writeResponse writes a JSON response to a request.
-func writeResponse(toWrite interface{}, w http.ResponseWriter, r *http.Request) {
-	response, err := json.MarshalIndent(toWrite, "", "\t")
+	in := &books.SearchIn{
+		Datastore: searchIn.Datastore,
+		BookTable: searchIn.BookTable,
+	}
+
+	if titlesOnly {
+		titles, err := books.SearchForTitles(in, searchBy)
+		if err != nil {
+			return &errorResponse{"Search failed."}, http.StatusBadRequest
+		}
+		return titles, http.StatusOK
+	}
+
+	books, err := books.Search(in, searchBy)
 	if err != nil {
-		writeError("Search failed.", w, r)
-	} else {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, string(response))
+		return &errorResponse{"Search failed."}, http.StatusBadRequest
+	}
+	return books, http.StatusOK
+}
+
+// write writes a JSON response to a request.
+func write(w http.ResponseWriter, r *http.Request, response interface{}, status int) {
+	if status >= 400 && status < 600 { // Error status.
+		message, ok := response.(errorResponse)
+		if ok {
+			errorLog(r, message)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	jsonRes, err := json.Marshal(response)
+	if err == nil { // Just for safety as there are no cyclic structures.
+		fmt.Fprint(w, string(jsonRes))
 	}
 }
 
-// writeError responds to a request with an error message using
-// the given writer, and logs the error.
-func writeError(message string, w http.ResponseWriter, r *http.Request) {
+// errorLog logs a request error.
+func errorLog(r *http.Request, message errorResponse) {
 	log.WithFields(
 		log.Fields{
 			"Address": r.RemoteAddr,
@@ -132,14 +154,6 @@ func writeError(message string, w http.ResponseWriter, r *http.Request) {
 			"URL":     r.URL.String(),
 		},
 	).Info(message)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
-
-	response, err := json.MarshalIndent(&messageResponse{message}, "", "\t")
-	if err == nil { // Just for safety as there are no cyclic structures.
-		fmt.Fprint(w, string(response))
-	}
 }
 
 // isTitlesOnly checks query parameters to see if TitlesOnly was specified. If
