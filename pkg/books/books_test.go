@@ -42,16 +42,23 @@ func TestSearchByID(t *testing.T) {
 		},
 		30: nil,
 	} {
-		result, err := SearchByID(searchIn, id)
-		if err != nil && result != nil {
-			t.Errorf("search failed: %s", err.Error())
-		} else if err == nil && result == nil {
-			t.Errorf("expected error, got: %v", err)
-		} else {
-			if result != book && *result != *book {
-				t.Errorf("expected: %v, got: %v", book, result)
-			}
-		}
+		t.Run(
+			fmt.Sprintf("id: %d", id),
+			func(*testing.T) {
+				result, err := SearchByID(searchIn, id)
+				if err != nil && result != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
+
+				if err == nil && result == nil {
+					t.Fatalf("expected error, got: %v", err)
+				}
+
+				if result != book && *result != *book {
+					t.Fatalf("expected: %v, got: %v", book, result)
+				}
+			},
+		)
 	}
 }
 
@@ -87,16 +94,23 @@ func TestSearchByTitle(t *testing.T) {
 			ReviewsCount:  8840,
 		},
 	} {
-		result, err := SearchByTitle(searchIn, name)
-		if err != nil {
-			t.Errorf("search failed: %s", err.Error())
-		} else {
-			if len(result) != 1 {
-				t.Errorf("expected: %d search result, got: %d.", 1, len(result))
-			} else if *result[0] != *book {
-				t.Errorf("incorrect search result for %s.", name)
-			}
-		}
+		t.Run(
+			fmt.Sprintf("name: %s", name),
+			func(*testing.T) {
+				result, err := SearchByTitle(searchIn, name)
+				if err != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
+
+				if len(result) != 1 {
+					t.Fatalf("expected: %d search result, got: %d.", 1, len(result))
+				}
+
+				if *result[0] != *book {
+					t.Fatalf("incorrect search result for %s.", name)
+				}
+			},
+		)
 	}
 }
 
@@ -105,6 +119,7 @@ func TestSearch(t *testing.T) {
 	searchIn, deferFn := testingSearchIn(t)
 	defer deferFn()
 
+	i := 0
 	for searchBy, book := range map[*SearchBy][]*Book{
 		&SearchBy{
 			TitleHas:          "Secrets",
@@ -235,20 +250,26 @@ func TestSearch(t *testing.T) {
 			ReviewsCountFloor: -1,
 		}: []*Book{},
 	} {
-		result, err := Search(searchIn, searchBy)
-		if err != nil {
-			t.Errorf("search failed: %s", err.Error())
-		} else {
-			if len(result) != len(book) {
-				t.Errorf("expected: %d search result, got: %d", 1, len(result))
-			} else {
+		t.Run(
+			fmt.Sprintf("test: %d", i),
+			func(*testing.T) {
+				result, err := Search(searchIn, searchBy)
+				if err != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
+
+				if len(result) != len(book) {
+					t.Fatalf("expected: %d search result, got: %d", 1, len(result))
+				}
+
 				for i, res := range result {
 					if *res != *book[i] {
-						t.Errorf("incorrect search result for %s", book[i].Title)
+						t.Fatalf("incorrect search result for %s", book[i].Title)
 					}
 				}
-			}
-		}
+			},
+		)
+		i++
 	}
 }
 
@@ -257,6 +278,7 @@ func TestSearchForTitles(t *testing.T) {
 	searchIn, deferFn := testingSearchIn(t)
 	defer deferFn()
 
+	i := 0
 	for searchBy, title := range map[*SearchBy][]string{
 		&SearchBy{
 			TitleHas:          "Secrets",
@@ -330,20 +352,26 @@ func TestSearchForTitles(t *testing.T) {
 			ReviewsCountFloor: -1,
 		}: []string{},
 	} {
-		result, err := SearchForTitles(searchIn, searchBy)
-		if err != nil {
-			t.Errorf("search failed: %s", err.Error())
-		} else {
-			if len(result) != len(title) {
-				t.Errorf("expected: %d search result, got: %d", 1, len(result))
-			} else {
+		t.Run(
+			fmt.Sprintf("test: %d", i),
+			func(*testing.T) {
+				result, err := SearchForTitles(searchIn, searchBy)
+				if err != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
+
+				if len(result) != len(title) {
+					t.Fatalf("expected: %d search result, got: %d", 1, len(result))
+				}
+
 				for i, res := range result {
 					if res != title[i] {
-						t.Errorf("incorrect search result for %s", title[i])
+						t.Fatalf("incorrect search result for %s", title[i])
 					}
 				}
-			}
-		}
+			},
+		)
+		i++
 	}
 }
 
