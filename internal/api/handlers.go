@@ -139,7 +139,7 @@ func write(w http.ResponseWriter, r *http.Request, response interface{}, status 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
-	jsonRes, err := json.Marshal(response)
+	jsonRes, err := json.MarshalIndent(response, "", "\t")
 	if err == nil { // Just for safety as there are no cyclic structures.
 		fmt.Fprint(w, string(jsonRes))
 	}
