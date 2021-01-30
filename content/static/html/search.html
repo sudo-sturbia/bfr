@@ -11,7 +11,7 @@
         <input type="submit" value="Search" class="submit">
 
         <label for="Authors" class="author-label">Author</label>
-        <input type="text" name="Author" class="author">
+        <input type="text" name="Authors" class="author">
 
         <label for="LanguageCode" class="lang-label">Language</label>
         <select name="LanguageCode" class="lang">
@@ -26,19 +26,19 @@
         <input type="text" name="ISBN13" class="isbn13" size="13">
 
         <label for="Rating" class="rating-label">Rating</label>
-        <input type="number" name="RatingFloor" class="rating-floor" placeholder="minimum" min="0" max="5">
-        <input type="number" name="RatingCeil" class="rating-ceil" placeholder="maximum" min="0" max="5">
+        <input type="number" name="RatingFloor" class="rating-floor" placeholder="minimum" step="0.01" min="0" max="5">
+        <input type="number" name="RatingCeil" class="rating-ceil" placeholder="maximum" step="0.01" min="0" max="5">
 
         <label for="Pages" class="pages-label">Pages Count</label>
-        <input type="number" name="PagesFloor" class="pages-floor" placeholder="minimum" min="0">
-        <input type="number" name="PagesCeil" class="pages-ceil" placeholder="maximum" min="0">
+        <input type="number" name="PagesFloor" class="pages-floor" placeholder="minimum" step="0.01" min="0">
+        <input type="number" name="PagesCeil" class="pages-ceil" placeholder="maximum" step="0.01" min="0">
 
         <label for="RatingsCountCeil" class="count-label">Ratings Count</label>
-        <input type="number" name="RatingsCountFloor" class="count-floor" placeholder="minimum" min="0">
-        <input type="number" name="RatingsCountCeil" class="count-ceil" placeholder="maximum" min="0">
+        <input type="number" name="RatingsCountFloor" class="count-floor" placeholder="minimum" step="0.01" min="0">
+        <input type="number" name="RatingsCountCeil" class="count-ceil" placeholder="maximum" step="0.01" min="0">
 
         <label for="ReviewsCountCeil" class="reviews-label">Reviews Count</label>
-        <input type="number" name="ReviewssCountFloor" class="reviews-floor" placeholder="minimum" min="0">
-        <input type="number" name="ReviewsCountCeil" class="reviews-ceil" placeholder="maximum" min="0">
+        <input type="number" name="ReviewsCountFloor" class="reviews-floor" placeholder="minimum" step="0.01" min="0">
+        <input type="number" name="ReviewsCountCeil" class="reviews-ceil" placeholder="maximum" step="0.01" min="0">
     </form>
 {{end}}
