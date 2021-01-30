@@ -1,0 +1,20 @@
+{{define "head-content"}}
+    <meta name="description" content="A list of search results.">
+    <link rel="stylesheet" href="/static/css/results.css">
+    <title>Search Results - bfr</title>
+{{end}}
+
+{{define "page-content"}}
+    <div class="results-container">
+        <h1>Search Results - bfr</h1>
+        <div>
+            {{range .}}
+                <p class="book">
+                    <a href="/book/{{.ID}}" title="Go to book." target="_blank" rel="noopener noreferrer"><b>{{.Title}}</b></a>
+                    - Rated {{.AverageRating}}/5<br> by {{.Authors}}.
+                </p>
+                <div class="book-border"></div>
+            {{end}}
+        </div>
+    </div>
+{{end}}

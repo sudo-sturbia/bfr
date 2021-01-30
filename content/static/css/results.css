@@ -1,0 +1,33 @@
+/*
+ * Results page styling.
+ */
+.results-container {
+    display: grid;
+    gap: 5px 10px;
+    grid-template-rows: 1fr 9fr;
+
+    height: 90%;
+    margin-bottom: auto;
+    margin-top: auto;
+}
+
+.book {
+    padding: 5px 10px 5px 10px;
+
+    line-height: 25px;
+}
+
+.book > a {
+    outline: none;
+    text-decoration: none;
+}
+
+.book > a:link,
+.book > a:visited {
+    color: #79a8a9;
+}
+
+.book-border {
+    width: 80%;
+    border-bottom: #2a363b solid thin;
+}
