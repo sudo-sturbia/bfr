@@ -18,27 +18,35 @@ var (
 	decoder = schema.NewDecoder()
 )
 
-// errorResponse is an error message wrapper meant to be used as a JSON response
-// to requests in case of errors.
-type errorResponse struct {
-	Message string
-}
-
 // searchByID is a handler for /book/{id} endpoint.
 func (s *Server) searchByID(w http.ResponseWriter, r *http.Request) {
-	response, status := searchByIDResponse(s.searchIn, mux.Vars(r)["id"])
-	write(w, r, response, status)
+	response, status, ok := searchByIDResponse(s.searchIn, mux.Vars(r)["id"])
+	if ok {
+		write(w, r, response, status)
+	} else {
+		message, ok := response.(string)
+		if ok {
+			writeError(w, r, message, status)
+		}
+	}
 }
 
 // searchByTitle is a handler for /books/{title} endpoint.
 func (s *Server) searchByTitle(w http.ResponseWriter, r *http.Request) {
-	response, status := searchByTitleResponse(s.searchIn, mux.Vars(r)["title"])
-	write(w, r, response, status)
+	response, status, ok := searchByTitleResponse(s.searchIn, mux.Vars(r)["title"])
+	if ok {
+		write(w, r, response, status)
+	} else {
+		message, ok := response.(string)
+		if ok {
+			writeError(w, r, message, status)
+		}
+	}
 }
 
 // search is a handler for /books endpoint.
 func (s *Server) search(w http.ResponseWriter, r *http.Request) {
-	response, status := searchResponse(
+	response, status, ok := searchResponse(
 		r.URL.Query(),
 		s.searchIn,
 		&books.SearchBy{
@@ -57,15 +65,23 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 			ReviewsCountFloor: -1,
 		},
 	)
-	write(w, r, response, status)
+	if ok {
+		write(w, r, response, status)
+	} else {
+		message, ok := response.(string)
+		if ok {
+			writeError(w, r, message, status)
+		}
+	}
 }
 
 // searchByIDResponse searchs the database for books based on given parameters and
-// returns a response and a status code. It should be used by Server.searchByID.
-func searchByIDResponse(searchIn *SearchIn, idString string) (interface{}, int) {
+// returns a response, a status code, and bool indicating if the operation was performed
+// successfully. It should be used by Server.searchByID.
+func searchByIDResponse(searchIn *SearchIn, idString string) (interface{}, int, bool) {
 	id, err := strconv.Atoi(idString)
 	if err != nil {
-		return &errorResponse{fmt.Sprintf("Invalid id \"%s\".", idString)}, http.StatusBadRequest
+		return fmt.Sprintf("Invalid id \"%s\".", idString), http.StatusBadRequest, false
 	}
 
 	book, err := books.SearchByID(
@@ -76,14 +92,15 @@ func searchByIDResponse(searchIn *SearchIn, idString string) (interface{}, int) 
 		id,
 	)
 	if err != nil {
-		return &errorResponse{"Search failed."}, http.StatusBadRequest
+		return "Search failed.", http.StatusBadRequest, false
 	}
-	return book, http.StatusOK
+	return book, http.StatusOK, true
 }
 
 // searchByTitleResponse searchs the database for books based on given parameters and
-// returns a response and a status code. It should be used by Server.searchByTitle.
-func searchByTitleResponse(searchIn *SearchIn, title string) (interface{}, int) {
+// returns a response, a status code, and bool indicating if the operation was performed
+// successfully. It should be used by Server.searchByTitle.
+func searchByTitleResponse(searchIn *SearchIn, title string) (interface{}, int, bool) {
 	books, err := books.SearchByTitle(
 		&books.SearchIn{
 			Datastore: searchIn.Datastore,
@@ -93,18 +110,19 @@ func searchByTitleResponse(searchIn *SearchIn, title string) (interface{}, int) 
 	)
 
 	if err != nil {
-		return &errorResponse{"Search failed."}, http.StatusBadRequest
+		return "Search failed.", http.StatusBadRequest, false
 	}
-	return books, http.StatusOK
+	return books, http.StatusOK, true
 }
 
-// searchResponse searchs the database for books based on given parameters and returns
-// a response and a status code. It should be used by Server.search.
-func searchResponse(query url.Values, searchIn *SearchIn, searchBy *books.SearchBy) (interface{}, int) {
+// searchResponse searchs the database for books based on given parameters and
+// returns a response, a status code, and bool indicating if the operation was performed
+// successfully. It should be used by Server.search.
+func searchResponse(query url.Values, searchIn *SearchIn, searchBy *books.SearchBy) (interface{}, int, bool) {
 	titlesOnly, parameters := isTitlesOnly(query)
 	err := decoder.Decode(searchBy, parameters)
 	if err != nil {
-		return &errorResponse{err.Error()}, http.StatusBadRequest
+		return "Unable to decode search query.", http.StatusBadRequest, false
 	}
 
 	in := &books.SearchIn{
@@ -115,27 +133,20 @@ func searchResponse(query url.Values, searchIn *SearchIn, searchBy *books.Search
 	if titlesOnly {
 		titles, err := books.SearchForTitles(in, searchBy)
 		if err != nil {
-			return &errorResponse{"Search failed."}, http.StatusBadRequest
+			return "Search failed.", http.StatusBadRequest, false
 		}
-		return titles, http.StatusOK
+		return titles, http.StatusOK, true
 	}
 
 	books, err := books.Search(in, searchBy)
 	if err != nil {
-		return &errorResponse{"Search failed."}, http.StatusBadRequest
+		return "Search failed.", http.StatusBadRequest, false
 	}
-	return books, http.StatusOK
+	return books, http.StatusOK, true
 }
 
 // write writes a JSON response to a request.
 func write(w http.ResponseWriter, r *http.Request, response interface{}, status int) {
-	if status >= 400 && status < 600 { // Error status.
-		message, ok := response.(errorResponse)
-		if ok {
-			errorLog(r, message)
-		}
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
@@ -145,8 +156,8 @@ func write(w http.ResponseWriter, r *http.Request, response interface{}, status 
 	}
 }
 
-// errorLog logs a request error.
-func errorLog(r *http.Request, message errorResponse) {
+// writeError logs the error and writes it to request.
+func writeError(w http.ResponseWriter, r *http.Request, message string, status int) {
 	log.WithFields(
 		log.Fields{
 			"Address": r.RemoteAddr,
@@ -154,6 +165,7 @@ func errorLog(r *http.Request, message errorResponse) {
 			"URL":     r.URL.String(),
 		},
 	).Info(message)
+	http.Error(w, message, status)
 }
 
 // isTitlesOnly checks query parameters to see if TitlesOnly was specified. If

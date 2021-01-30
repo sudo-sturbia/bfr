@@ -26,22 +26,14 @@ func TestSearchByID(t *testing.T) {
 		status   int
 	}{
 		{
-			id: -1,
-			response: fmt.Sprint(
-				"{\n",
-				"\t\"Message\": \"Search failed.\"\n",
-				"}",
-			),
-			status: 400,
+			id:       -1,
+			response: "Search failed.\n",
+			status:   400,
 		},
 		{
-			id: 40,
-			response: fmt.Sprint(
-				"{\n",
-				"\t\"Message\": \"Search failed.\"\n",
-				"}",
-			),
-			status: 400,
+			id:       40,
+			response: "Search failed.\n",
+			status:   400,
 		},
 		{
 			id: 1,
@@ -155,12 +147,8 @@ func TestSearch(t *testing.T) {
 	}{
 		{
 			queryParams: "Wrong=10",
-			response: fmt.Sprint(
-				"{\n",
-				"\t\"Message\": \"schema: invalid path \\\"Wrong\\\"\"\n",
-				"}",
-			),
-			status: 400,
+			response:    "Unable to decode search query.\n",
+			status:      400,
 		},
 		{
 			queryParams: "Authors=Arthur&RatingFloor=4.3",
