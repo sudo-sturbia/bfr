@@ -22,7 +22,8 @@ body {
 /* Footer. */
 body > footer {
     text-align: right;
-    margin-top: 20px;
+    padding-bottom: 30px;
+    padding-top: 20px;
 }
 
 body > footer > a {
