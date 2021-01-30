@@ -25,7 +25,7 @@ type Server struct {
 type Config struct {
 	Host   string // Host to run the server on.
 	Port   string // Port to run the server on.
-	static string // Path to static files.
+	Static string // Path to static files.
 }
 
 // New returns a new, initialized frontend server.
@@ -44,6 +44,7 @@ func New(cfg *Config, api string) (_ *Server, err error) {
 	s.router.HandleFunc("/", s.searchForm).Methods("GET")
 	s.router.HandleFunc("/search", s.searchResults).Methods("GET")
 	s.router.HandleFunc("/book/{id}", s.serveBook).Methods("GET")
+	s.router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(s.cfg.Static))))
 	return s, nil
 }
 
@@ -54,11 +55,11 @@ func (s *Server) Run() {
 
 // newTemplates parses templates and returns a new template map.
 func newTemplates(cfg *Config) (_ map[string]*template.Template, err error) {
-	base := fmt.Sprintf("%s/base.html", cfg.static)
+	base := fmt.Sprintf("%s/base.html", cfg.Static)
 
 	tmpls := make(map[string]*template.Template)
 	for _, name := range []string{searchTmpl, resultsTmpl, bookTmpl} {
-		tmpls[name], err = template.ParseFiles(base, fmt.Sprintf("%s/%s.html", cfg.static, name))
+		tmpls[name], err = template.ParseFiles(base, fmt.Sprintf("%s/%s.html", cfg.Static, name))
 		if err != nil {
 			return nil, err
 		}
