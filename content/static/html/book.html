@@ -1,0 +1,20 @@
+{{define "head-content"}}
+    <meta name="description" content="Information about book {{.Title}}.">
+    <link rel="stylesheet" href="/static/css/book.css">
+    <title>{{.Title}} - bfr</title>
+{{end}}
+
+{{define "page-content"}}
+    <div class="book-container">
+        <h1>{{.Title}}</h1>
+        <p>
+            by {{.Authors}},<br>
+            {{.Pages}} Pages,<br>
+            Written in {{.LanguageCode}},<br>
+            Rated {{.AverageRating}}/5,<br>
+            based on {{.RatingsCount}} ratings, and {{.ReviewsCount}} reviews,<br>
+            isbn {{.ISBN}},<br>
+            isbn13 {{.ISBN13}}.<br>
+        </p>
+    </div>
+{{end}}
