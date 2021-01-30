@@ -55,11 +55,11 @@ func (s *Server) Run() {
 
 // newTemplates parses templates and returns a new template map.
 func newTemplates(cfg *Config) (_ map[string]*template.Template, err error) {
-	base := fmt.Sprintf("%s/base.html", cfg.Static)
+	base := fmt.Sprintf("%s/html/base.html", cfg.Static)
 
 	tmpls := make(map[string]*template.Template)
 	for _, name := range []string{searchTmpl, resultsTmpl, bookTmpl} {
-		tmpls[name], err = template.ParseFiles(base, fmt.Sprintf("%s/%s.html", cfg.Static, name))
+		tmpls[name], err = template.ParseFiles(base, fmt.Sprintf("%s/html/%s.html", cfg.Static, name))
 		if err != nil {
 			return nil, err
 		}
