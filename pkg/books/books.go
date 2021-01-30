@@ -58,6 +58,34 @@ type SearchBy struct {
 	ReviewsCountFloor int     // Number of reviews must be higher than.
 }
 
+// SearchByID searchs for an ID in table and database specified in SearchIn, and
+// returns a Book, if any is found, and an error otherwise.
+func SearchByID(searchIn *SearchIn, id int) (*Book, error) {
+	search := fmt.Sprintf("select * from %s where id = ?;", searchIn.BookTable)
+	rows, err := searchIn.Datastore.Query(search, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if rows.Next() {
+		book := new(Book)
+		rows.Scan(
+			&book.ID,
+			&book.Title,
+			&book.Authors,
+			&book.AverageRating,
+			&book.ISBN,
+			&book.ISBN13,
+			&book.LanguageCode,
+			&book.Pages,
+			&book.RatingsCount,
+			&book.ReviewsCount,
+		)
+		return book, nil
+	}
+	return nil, fmt.Errorf("failed to find id")
+}
+
 // SearchByTitle searchs in table and database specified in given SearchIn, and returns
 // a list of books that match the given title.
 func SearchByTitle(searchIn *SearchIn, title string) ([]*Book, error) {
