@@ -1,21 +1,23 @@
 # bfr
-bfr, short for book finder, pronounced buffer, is a book searching web server /
-REST API. bfr is capable of searching for books using their titles or, more
-interestingly, using a set of search parameters.
+bfr, short for book finder, is a book searching web application with a REST API. bfr
+is capable of searching for books using their titles or, more interestingly, using a
+set of search parameters.
 
-## How To Install?
-```
-GO111MODULE=on go get github.com/sudo-sturbia/bfr
-```
+## How To Run?
+- Clone the repo using `git clone https://github.com/sudo-sturbia/bfr.git`.
+- The programs used to run the servers (frontend and backend) live in `cmd`.
+    - For the API use `go run ./cmd/api`.
+    - For the frontend `go run ./cmd/frontend`.
 
 ## How To Use?
+### API
 ```
-bfr is a web server that enables searching for books using a set of parameters.
+A REST API that enables searching for books using a set of parameters.
 Usage:
-    bfr                 Run as a web server at :6060.
-    bfr -dataset path   Load a new csv dataset to use as a datastore, then runs the server.
-    bfr -port <number>  Use the specified port to run the server.
-    bfr -h              Print a help message.
+    go run ./cmd/api                 Run a backend server at localhost:6060.
+    go run ./cmd/api -dataset path   Load a new csv dataset to use as a datastore, then run the server.
+    go run ./cmd/api -port <number>  Use the specified port to run the server.
+    go run ./cmd/api -h              Print a help message.
 
 See github.com/sudo-sturbia/bfr.
 ```
@@ -26,8 +28,13 @@ the server uses the last created datastore and can run simply using `bfr`.
 For the dataset checkout [goodreads-books](https://www.kaggle.com/jealousleopard/goodreadsbooks),
 you can also construct your own dataset as long as its columns match [this sample](test-data/booksTest.csv).
 
-### API
 #### Endpoints
+##### /book/{id}
+```
+GET /book/{id}
+```
+Searchs for a book with the given ID. IDs depend on your dataset.
+
 ##### /books/{title}
 ```
 GET /books/{title}
@@ -99,3 +106,22 @@ Response:
 	"Mansfield Park"
 ]
 ```
+
+### Frontend
+```
+A frontend web server that utilizes bfr API to search for and find books.
+Usage:
+    go run ./cmd/frontend                 Run a frontend server at localhost:5050.
+    go run ./cmd/frontend -api <url>      Use given URL for API calls, default is localhost:6060.
+    go run ./cmd/frontend -port <number>  Run server at specified port.
+    go run ./cmd/frontend -static <path>  Use given path for static files.
+    go run ./cmd/frontend -h              Print this help message.
+
+See github.com/sudo-sturbia/bfr.
+```
+
+For the frontend to work, the backend must be running.
+
+#### Screenshots
+
+![frontend](images/bfr-frontend.png)
