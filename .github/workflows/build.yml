@@ -30,7 +30,12 @@ jobs:
             dep ensure
         fi
 
-    - name: Build main
+    - name: Build cmd/api
+      working-directory: cmd/api
+      run: go build -v .
+
+    - name: Build cmd/frontend
+      working-directory: cmd/frontend
       run: go build -v .
 
     - name: Build internal/datastore
@@ -49,10 +54,18 @@ jobs:
       run: go test -v -bench=. .
       working-directory: pkg/books
 
-    - name: Build internal/server
+    - name: Build internal/api
       run: go build -v .
-      working-directory: internal/server
+      working-directory: internal/api
 
-    - name: Test internal/server
+    - name: Test internal/api
       run: go test -v -bench=. .
-      working-directory: internal/server
+      working-directory: internal/api
+
+    - name: Build internal/frontend
+      run: go build -v .
+      working-directory: internal/frontend
+
+    - name: Test internal/frontend
+      run: go test -v -bench=. .
+      working-directory: internal/frontend
