@@ -20,7 +20,7 @@ func (s *Server) searchForm(w http.ResponseWriter, r *http.Request) {
 func (s *Server) searchResults(w http.ResponseWriter, r *http.Request) {
 	books, err := results(s.apiURL, r.URL.RawQuery)
 	if err != nil {
-		s.serveError(r, err)
+		s.serveError(w, r, err)
 	} else {
 		s.tmpls[resultsTmpl].Execute(w, books)
 	}
@@ -30,14 +30,14 @@ func (s *Server) searchResults(w http.ResponseWriter, r *http.Request) {
 func (s *Server) serveBook(w http.ResponseWriter, r *http.Request) {
 	book, err := book(s.apiURL, mux.Vars(r)["id"])
 	if err != nil {
-		s.serveError(r, err)
+		s.serveError(w, r, err)
 	} else {
 		s.tmpls[bookTmpl].Execute(w, book)
 	}
 }
 
 // serveError serves a static error page.
-func (s *Server) serveError(r *http.Request, err error) {
+func (s *Server) serveError(w http.ResponseWriter, r *http.Request, err error) {
 	log.WithFields(
 		log.Fields{
 			"Address": r.RemoteAddr,
@@ -45,6 +45,7 @@ func (s *Server) serveError(r *http.Request, err error) {
 			"URL":     r.URL.String(),
 		},
 	).Info(err.Error())
+	s.tmpls[errorTmpl].Execute(w, nil)
 }
 
 // results makes a request to the given api url and returns the response

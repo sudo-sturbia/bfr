@@ -12,6 +12,7 @@ const (
 	searchTmpl  = "search"
 	resultsTmpl = "results"
 	bookTmpl    = "book"
+	errorTmpl   = "error"
 )
 
 type Server struct {
@@ -58,7 +59,7 @@ func newTemplates(cfg *Config) (_ map[string]*template.Template, err error) {
 	base := fmt.Sprintf("%s/html/base.html", cfg.Static)
 
 	tmpls := make(map[string]*template.Template)
-	for _, name := range []string{searchTmpl, resultsTmpl, bookTmpl} {
+	for _, name := range []string{searchTmpl, resultsTmpl, bookTmpl, errorTmpl} {
 		tmpls[name], err = template.ParseFiles(base, fmt.Sprintf("%s/html/%s.html", cfg.Static, name))
 		if err != nil {
 			return nil, err
