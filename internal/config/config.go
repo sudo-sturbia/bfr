@@ -6,7 +6,7 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/sudo-sturbia/bfr/internal/datastore"
+	"github.com/sudo-sturbia/bfr/v2/internal/datastore"
 )
 
 // Config holds all configuration needed to run the server.

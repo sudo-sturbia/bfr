@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/sudo-sturbia/bfr/internal/api"
-	"github.com/sudo-sturbia/bfr/internal/config"
-	"github.com/sudo-sturbia/bfr/internal/datastore"
+	"github.com/sudo-sturbia/bfr/v2/internal/api"
+	"github.com/sudo-sturbia/bfr/v2/internal/config"
+	"github.com/sudo-sturbia/bfr/v2/internal/datastore"
 )
 
 var (

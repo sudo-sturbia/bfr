@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"github.com/sudo-sturbia/bfr/pkg/books"
+	"github.com/sudo-sturbia/bfr/v2/pkg/books"
 )
 
 // searchForm serves the search form.

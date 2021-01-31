@@ -1,4 +1,4 @@
-module github.com/sudo-sturbia/bfr
+module github.com/sudo-sturbia/bfr/v2
 
 go 1.15
 

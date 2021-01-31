@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/sudo-sturbia/bfr/internal/testhelper"
+	"github.com/sudo-sturbia/bfr/v2/internal/testhelper"
 )
 
 // TestSearchByID tests searching for a book using id.

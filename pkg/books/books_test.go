@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/sudo-sturbia/bfr/internal/testhelper"
+	"github.com/sudo-sturbia/bfr/v2/internal/testhelper"
 )
 
 // Test searching for books using IDs.

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/sudo-sturbia/bfr/internal/config"
-	"github.com/sudo-sturbia/bfr/internal/frontend"
+	"github.com/sudo-sturbia/bfr/v2/internal/config"
+	"github.com/sudo-sturbia/bfr/v2/internal/frontend"
 )
 
 var (

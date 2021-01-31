@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/sudo-sturbia/bfr/internal/datastore"
+	"github.com/sudo-sturbia/bfr/v2/internal/datastore"
 )
 
 // SearchIn returns a datastore, and a table name to use for constructing a SearchIn to
