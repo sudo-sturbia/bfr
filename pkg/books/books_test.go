@@ -1,40 +1,78 @@
 package books
 
 import (
-	"database/sql"
 	"fmt"
-	"os"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/sudo-sturbia/bfr/internal/datastore"
+	"github.com/sudo-sturbia/bfr/internal/testhelper"
 )
 
-// Test searching for books by title.
-func TestSearchByTitle(t *testing.T) {
-	config := &datastore.Config{
-		Driver:    "sqlite3",
-		Datastore: "testDatastore.db",
-		BookTable: "books",
-	}
-
-	err := datastore.New("../../test-data/booksTest.csv", config, true)
-	if err != nil {
-		t.Errorf("Couldn't load datastore: %s.", err.Error())
-		return
-	}
-
-	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s", config.Datastore))
-	if err != nil {
-		t.Errorf(err.Error())
-		return
-	}
-	defer datastore.Close()
-	defer os.Remove(config.Datastore)
+// Test searching for books using IDs.
+func TestSearchByID(t *testing.T) {
+	datastore, bookTable, deferFn := testhelper.SearchIn(t)
+	defer deferFn()
 
 	searchIn := &SearchIn{
 		Datastore: datastore,
-		BookTable: config.BookTable,
+		BookTable: bookTable,
+	}
+
+	for id, book := range map[int]*Book{
+		4: &Book{
+			ID:            4,
+			Title:         "Harry Potter and the Chamber of Secrets (Harry Potter  #2)",
+			Authors:       "J.K. Rowling",
+			AverageRating: 4.41,
+			ISBN:          "439554896",
+			ISBN13:        "9780439554893",
+			LanguageCode:  "eng",
+			Pages:         352,
+			RatingsCount:  6267,
+			ReviewsCount:  272,
+		},
+		14: &Book{
+			ID:            14,
+			Title:         "The Hitchhiker's Guide to the Galaxy (Hitchhiker's Guide to the Galaxy  #1)",
+			Authors:       "Douglas Adams",
+			AverageRating: 4.22,
+			ISBN:          "1400052920",
+			ISBN13:        "9781400052929",
+			LanguageCode:  "eng",
+			Pages:         215,
+			RatingsCount:  4416,
+			ReviewsCount:  408,
+		},
+		30: nil,
+	} {
+		t.Run(
+			fmt.Sprintf("id: %d", id),
+			func(*testing.T) {
+				result, err := SearchByID(searchIn, id)
+				if err != nil && result != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
+
+				if err == nil && result == nil {
+					t.Fatalf("expected error, got: %v", err)
+				}
+
+				if result != book && *result != *book {
+					t.Fatalf("expected: %v, got: %v", book, result)
+				}
+			},
+		)
+	}
+}
+
+// Test searching for books by title.
+func TestSearchByTitle(t *testing.T) {
+	datastore, bookTable, deferFn := testhelper.SearchIn(t)
+	defer deferFn()
+
+	searchIn := &SearchIn{
+		Datastore: datastore,
+		BookTable: bookTable,
 	}
 
 	for name, book := range map[string]*Book{
@@ -64,50 +102,37 @@ func TestSearchByTitle(t *testing.T) {
 			ReviewsCount:  8840,
 		},
 	} {
-		result, err := SearchByTitle(searchIn, name)
-		if err != nil {
-			t.Errorf("Search failed.")
-			continue
-		}
+		t.Run(
+			fmt.Sprintf("name: %s", name),
+			func(*testing.T) {
+				result, err := SearchByTitle(searchIn, name)
+				if err != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
 
-		if len(result) != 1 {
-			t.Errorf("Expected %d search result, Found %d.", 1, len(result))
-			continue
-		}
+				if len(result) != 1 {
+					t.Fatalf("expected: %d search result, got: %d.", 1, len(result))
+				}
 
-		if *result[0] != *book {
-			t.Errorf("Incorrect search result for %s.", name)
-		}
+				if *result[0] != *book {
+					t.Fatalf("incorrect search result for %s.", name)
+				}
+			},
+		)
 	}
 }
 
 // Test searching using a SearchBy.
 func TestSearch(t *testing.T) {
-	config := &datastore.Config{
-		Driver:    "sqlite3",
-		Datastore: "testDatastore.db",
-		BookTable: "books",
-	}
-
-	err := datastore.New("../../test-data/booksTest.csv", config, true)
-	if err != nil {
-		t.Errorf("Couldn't load datastore: %s.", err.Error())
-		return
-	}
-
-	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s", config.Datastore))
-	if err != nil {
-		t.Errorf(err.Error())
-		return
-	}
-	defer datastore.Close()
-	defer os.Remove(config.Datastore)
+	datastore, bookTable, deferFn := testhelper.SearchIn(t)
+	defer deferFn()
 
 	searchIn := &SearchIn{
 		Datastore: datastore,
-		BookTable: config.BookTable,
+		BookTable: bookTable,
 	}
 
+	i := 0
 	for searchBy, book := range map[*SearchBy][]*Book{
 		&SearchBy{
 			TitleHas:          "Secrets",
@@ -238,52 +263,40 @@ func TestSearch(t *testing.T) {
 			ReviewsCountFloor: -1,
 		}: []*Book{},
 	} {
-		result, err := Search(searchIn, searchBy)
-		if err != nil {
-			t.Errorf("Search failed.")
-			continue
-		}
+		t.Run(
+			fmt.Sprintf("test: %d", i),
+			func(*testing.T) {
+				result, err := Search(searchIn, searchBy)
+				if err != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
 
-		if len(result) != len(book) {
-			t.Errorf("Expected %d search result, Found %d.", 1, len(result))
-			continue
-		}
+				if len(result) != len(book) {
+					t.Fatalf("expected: %d search result, got: %d", 1, len(result))
+				}
 
-		for i, res := range result {
-			if *res != *book[i] {
-				t.Errorf("Incorrect search result for %s.", book[i].Title)
-			}
-		}
+				for i, res := range result {
+					if *res != *book[i] {
+						t.Fatalf("incorrect search result for %s", book[i].Title)
+					}
+				}
+			},
+		)
+		i++
 	}
 }
 
 // Test searching for books' titles using SearchBy.
 func TestSearchForTitles(t *testing.T) {
-	config := &datastore.Config{
-		Driver:    "sqlite3",
-		Datastore: "testDatastore.db",
-		BookTable: "books",
-	}
-
-	err := datastore.New("../../test-data/booksTest.csv", config, true)
-	if err != nil {
-		t.Errorf("Couldn't load datastore: %s.", err.Error())
-		return
-	}
-
-	datastore, err := sql.Open(config.Driver, fmt.Sprintf("file:%s", config.Datastore))
-	if err != nil {
-		t.Errorf(err.Error())
-		return
-	}
-	defer datastore.Close()
-	defer os.Remove(config.Datastore)
+	datastore, bookTable, deferFn := testhelper.SearchIn(t)
+	defer deferFn()
 
 	searchIn := &SearchIn{
 		Datastore: datastore,
-		BookTable: config.BookTable,
+		BookTable: bookTable,
 	}
 
+	i := 0
 	for searchBy, title := range map[*SearchBy][]string{
 		&SearchBy{
 			TitleHas:          "Secrets",
@@ -357,21 +370,25 @@ func TestSearchForTitles(t *testing.T) {
 			ReviewsCountFloor: -1,
 		}: []string{},
 	} {
-		result, err := SearchForTitles(searchIn, searchBy)
-		if err != nil {
-			t.Errorf("Search failed.")
-			continue
-		}
+		t.Run(
+			fmt.Sprintf("test: %d", i),
+			func(*testing.T) {
+				result, err := SearchForTitles(searchIn, searchBy)
+				if err != nil {
+					t.Fatalf("search failed: %s", err.Error())
+				}
 
-		if len(result) != len(title) {
-			t.Errorf("Expected %d search result, Found %d.", 1, len(result))
-			continue
-		}
+				if len(result) != len(title) {
+					t.Fatalf("expected: %d search result, got: %d", 1, len(result))
+				}
 
-		for i, res := range result {
-			if res != title[i] {
-				t.Errorf("Incorrect search result for %s.", title[i])
-			}
-		}
+				for i, res := range result {
+					if res != title[i] {
+						t.Fatalf("incorrect search result for %s", title[i])
+					}
+				}
+			},
+		)
+		i++
 	}
 }

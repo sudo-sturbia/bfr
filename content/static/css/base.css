@@ -1,0 +1,37 @@
+html {
+    height: 100%;
+}
+
+body {
+    display: grid;
+    gap: 25px 25px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 9fr 1fr;
+
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 18px;
+
+    height: 100%;
+    width: 60%;
+    margin: auto auto auto auto;
+
+    background-color: #f4f7f7;
+    color: #2a363b;
+}
+
+/* Footer. */
+body > footer {
+    text-align: right;
+    padding-bottom: 30px;
+    padding-top: 20px;
+}
+
+body > footer > a {
+    outline: none;
+    text-decoration: none;
+}
+
+body > footer > a:link,
+body > footer > a:visited {
+    color: #79a8a9;
+}

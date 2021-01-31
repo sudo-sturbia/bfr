@@ -1,0 +1,33 @@
+/*
+ * Results page styling.
+ */
+.results-container {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+h1 {
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.book {
+    padding: 5px 10px 5px 10px;
+
+    line-height: 25px;
+}
+
+.book > a {
+    outline: none;
+    text-decoration: none;
+}
+
+.book > a:link,
+.book > a:visited {
+    color: #79a8a9;
+}
+
+.book-border {
+    width: 80%;
+    border-bottom: #2a363b solid thin;
+}

@@ -1,0 +1,14 @@
+/*
+ * Error page styling.
+ */
+.error-container {
+    height: 90%;
+    margin-bottom: auto;
+    margin-top: auto;
+}
+
+p {
+    font-size: 20px;
+    line-height: 30px;
+    text-align: center;
+}

@@ -1,0 +1,166 @@
+/*
+ * Search Form Styling.
+ */
+.search-form {
+    display: grid;
+    gap: 5px 10px;
+    grid-template-columns: 2.5fr 3fr 1fr 1fr 2.5fr;
+    grid-template-rows: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+
+    height: 60%;
+    margin: auto auto auto auto;
+
+    line-height: 25px;
+}
+
+input,
+select {
+    background-color: #f4f7f7;
+    border-color: #2a363b;
+    border-width: 0 0 1px 0;
+    outline: 0;
+}
+
+input,
+select,
+label {
+    height: 20px;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.title-has {
+    grid-column: 1/5;
+    grid-row: 1;
+
+    font-size: 18px;
+    line-height: 20px;
+    text-align: center;
+
+    height: 30px;
+    width: 100%;
+
+    margin: auto auto auto auto;
+}
+
+.submit {
+    grid-column: 5/6;
+    grid-row: 1;
+
+    font-size: 15px;
+    line-height: 18px;
+    text-align: center;
+
+    height: 30px;
+    width: 80%;
+    min-width: 70px;
+
+    margin: auto auto auto auto;
+
+    border-color: #2a363b;
+    border-width: 1px 1px 1px 1px;
+    border-radius: 7px;
+}
+
+.author-label {
+    grid-column: 2/3;
+    grid-row: 2;
+}
+
+.author {
+    grid-column: 3/4;
+    grid-row: 2;
+}
+
+.lang-label {
+    grid-column: 2/3;
+    grid-row: 3;
+}
+
+.lang {
+    grid-column: 3/4;
+    grid-row: 3;
+}
+
+.isbn-label {
+    grid-column: 2/3;
+    grid-row: 4;
+}
+
+.isbn {
+    grid-column: 3/4;
+    grid-row: 4;
+}
+
+.isbn13-label {
+    grid-column: 2/3;
+    grid-row: 5;
+}
+
+.isbn13 {
+    grid-column: 3/4;
+    grid-row: 5;
+}
+
+.rating-label {
+    grid-column: 2/3;
+    grid-row: 6;
+}
+
+.rating-floor {
+    grid-column: 3/4;
+    grid-row: 6;
+}
+
+.rating-ceil {
+    grid-column: 4/5;
+    grid-row: 6;
+}
+
+.pages-label {
+    grid-column: 2/3;
+    grid-row: 7;
+}
+
+.pages-floor {
+    grid-column: 3/4;
+    grid-row: 7;
+}
+
+.pages-ceil {
+    grid-column: 4/5;
+    grid-row: 7;
+}
+
+.count-label {
+    grid-column: 2/3;
+    grid-row: 8;
+}
+
+.count-floor {
+    grid-column: 3/4;
+    grid-row: 8;
+}
+
+.count-ceil {
+    grid-column: 4/5;
+    grid-row: 8;
+}
+
+.reviews-label {
+    grid-column: 2/3;
+    grid-row: 9;
+}
+
+.reviews-floor {
+    grid-column: 3/4;
+    grid-row: 9;
+}
+
+.reviews-ceil {
+    grid-column: 4/5;
+    grid-row: 9;
+}
