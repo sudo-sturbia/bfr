@@ -1,3 +1,5 @@
+// Package frontend contains an implementation of a frontend server to be used
+// with bfr's API.
 package frontend
 
 import (
@@ -8,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Names of available templates.
 const (
 	searchTmpl  = "search"
 	resultsTmpl = "results"
@@ -15,6 +18,7 @@ const (
 	errorTmpl   = "error"
 )
 
+// Server represents bfr's frontend server.
 type Server struct {
 	cfg    *Config
 	router *mux.Router

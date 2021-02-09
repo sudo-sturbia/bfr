@@ -1,4 +1,4 @@
-// package config handles server's configuration.
+// Package config handles server's configuration.
 package config
 
 import (

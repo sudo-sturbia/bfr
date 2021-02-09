@@ -1,5 +1,5 @@
-// Package api is used to create, and run a new, initialized
-// backend server instance.
+// Package api is used to create, and run a new, initialized backend
+// server instance.
 package api
 
 import (
@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Server represents bfr's http server, and holds all dependencies needed
+// Server represents bfr's backend server, and holds all dependencies needed
 // for a server to run.
 type Server struct {
 	cfg    *Config     // Server's configuration options.

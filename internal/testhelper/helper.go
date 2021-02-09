@@ -1,3 +1,4 @@
+// Package testhelper contains functions needed to setup tests.
 package testhelper
 
 import (
@@ -6,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Used for sql package.
 	"github.com/sudo-sturbia/bfr/v2/internal/datastore"
 )
 
